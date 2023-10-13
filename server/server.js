@@ -1,16 +1,20 @@
-const http = require("http");
-const PORT = 3000;
+const express = require("express");
+const app = express();
+const superhero_util = require('./script.js');
+const port = process.env.PORT || 3000;
 
-const server = http.createServer((req,res) =>{
-    if(req.url === "/"){
-        res.write("Hello World");
-        res.end();
-    }
-    if(req.url ==="/api/courses"){
-        res.write(JSON.stringify([1,2,3]));
-        res.end();
-    }
+
+app.get("/", (req, res) => {
+    res.send("Hello World");
 });
 
-server.listen(PORT);
-console.log("Listening on port 3000...")
+app.get("/api/superheros_info", (req, res) => {
+    res.send(superhero_util.get_all_info());
+});
+
+app.get("/api/superheros_info/:id", (req, res) => {
+    res.send(superhero_util.get_info(req.params.id));
+});
+
+
+app.listen(port, () => console.log(`Listening on port ${port}...`));
