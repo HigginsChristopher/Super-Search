@@ -19,11 +19,23 @@ list_db.defaults({ lists: [] }).write();
 
 const get_all_info = () => info_db.get("content").value();
 
-const get_info = id => info_db.get("content").find({ "id": parseInt(id) }).value();
+const get_info = id => {
+    const superhero_id = parseInt(id);
+    if (!Number.isInteger(superhero_id)) return new Error("ID must be an integer!")
+    const info = info_db.get("content").find({ "id": superhero_id }).value();
+    if (info === undefined) return new Error(`No results for given ID: ${superhero_id}`)
+    return info;
+}
 
 const get_all_powers = () => powers_db.get("content").value();
 
-const get_powers = id => powers_db.get("content").find({ "hero_names": get_info(parseInt(id)).name }).value();
+const get_powers = id => {
+    const superhero_id = parseInt(id);
+    if (!Number.isInteger(superhero_id)) return new Error("ID must be an integer!");
+    const powers = powers_db.get("content").find({ "hero_names": get_info(parseInt(id)).name }).value();
+    if (powers === undefined) return new Error(`No results for given ID: ${superhero_id}`);
+    return powers;
+}
 
 const get_publishers = () => {
     const data = info_db.get("content");
@@ -36,15 +48,24 @@ const get_publishers = () => {
 }
 
 const match = (field, match, n = 1) => {
+    n = parseInt(n);
+    if (!Number.isInteger(n)) return new Error("n must be an integer!");
+    if (field === "id" && !Number.isInteger(match)) return new Error("Match for field ID must be an integer!");
+    if (field === undefined) return new Error("Missing field parameter!");
+    if (match === undefined) return new Error("Missing match parameter!");
+    if (n > 734) return new Error("n can only be less than 734! (only 734 heroes)")
     let superhero_info = info_db.get("content");
     const lower_case_field = field.toLowerCase();
     const lower_case_match = match.toLowerCase();
-    return superhero_info
+    //if(item[lower_case_field] === undefined) return new Error(`No field name called '${field}'!`);
+
+    const match_result = superhero_info
         .filter(item => item[lower_case_field].toLowerCase().includes(lower_case_match))
         .take(parseInt(n))
         .map("id")
         .value();
-
+    if (match_result.length === 0) return new Error(`No results for field: '${field}' and match: '${match}'!`);
+    return match_result;
 }
 
 const get_list = (name) => {
@@ -93,13 +114,24 @@ const delete_list = (name) => {
 };
 
 const get_details_from_list = (id_list) => {
-    let results = [];
+    try {
+        id_list = JSON.parse(id_list)
+    } catch (error) {
+        return new Error("ID list cannot be anything but an array of integers!");
+    }
+    if (id_list.length === 0) {
+        return new Error("ID list can't be empty!");
+    }
+    else if (!id_list.every(x => Number.isInteger(x))) {
+        return new Error("ID list cannot contain anything but integers!");
+    }
+    let results = new Set();
     for (let i = 0; i < id_list.length; i++) {
         let info = get_info(id_list[i]);
         info.powers = get_powers(id_list[i]);
-        results.push(info);
+        results.add(info);
     }
-    return results;
+    return Array.from(results);
 }
 
 const validate_list = (list) => {
@@ -109,6 +141,7 @@ const validate_list = (list) => {
     }
     return Joi.validate(list, schema);
 };
+
 
 
 // console.log(get_all_info());
