@@ -1,6 +1,7 @@
 const { result } = require("lodash");
 const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
+const Joi = require("joi");
 
 const info_adapter = new FileSync("../data/superhero_info.json");
 const info_db = low(info_adapter)
@@ -57,7 +58,6 @@ const create_list = (name, id_list) => {
         list_db.get("lists").push(newList).write();
     }
     else {
-        console.log("List-name already exists!");
         return new Error("List-name already exists!");
     }
 };
@@ -68,7 +68,6 @@ const save_list = (name, id_list) => {
         list.assign({ "superhero_ids": id_list }).write();
     }
     else {
-        console.log("List-name doesn't exist!");
         return new Error("List-name doesn't exist!");
     }
 };
@@ -79,7 +78,6 @@ const get_list_ids = (name) => {
         return list["superhero_ids"];
     }
     else {
-        console.log("List-name doesn't exist!");
         return new Error("List-name doesn't exist!");
     }
 };
@@ -90,7 +88,6 @@ const delete_list = (name) => {
         list_db.get("lists").remove(list).write();
     }
     else {
-        console.log("List-name doesn't exist!");
         return new Error("List-name doesn't exist!");
     }
 };
@@ -105,26 +102,36 @@ const get_details_from_list = (id_list) => {
     return results;
 }
 
+const validate_list = (list) => {
+    const schema = {
+        name: Joi.string().max(100).min(1).required(),
+        id_list: Joi.array().items(Joi.number()).max(734).min(1).required()
+    }
+    return Joi.validate(list, schema);
+};
+
 
 // console.log(get_all_info());
 // console.log(get_info(0));
 // console.log(get_powers(0));
 // console.log(get_publishers());
 // console.log(match("name", "spider",2));
-create_list("TEST1", [579, 580])
+// create_list("TEST1", [579, 580])
 // create_list("test1", [579,580])
-let ids = get_list_ids("test1")
-console.log(ids);
+// let ids = get_list_ids("test1")
+// console.log(ids);
 // save_list("test1", [579])
 // ids = get_list_ids("test1")
 // console.log(ids);
 // delete_list("test1");
-console.log(get_details_from_list(ids));
+// console.log(get_details_from_list(ids));
 
 module.exports = {
+    validate_list,
     create_list,
     save_list,
     get_list_ids,
+    get_list,
     delete_list,
     get_details_from_list,
     get_all_info,
