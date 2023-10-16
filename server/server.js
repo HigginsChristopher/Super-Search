@@ -13,39 +13,28 @@ app.get("/api/superheros_info/publishers", (req, res) => {
 });
 
 app.get("/api/superheros_info/match", (req, res) => {
+    let match_result;
     const field = req.query.field;
-    const valid_fields = [
-        "id",
-        "name",
-        "Gender",
-        "Eye color",
-        "Race",
-        "Hair color",
-        "Height",
-        "Publisher",
-        "Skin color",
-        "Alignment",
-        "Weight"
-    ]
-    if (!valid_fields.includes(field)) {
-        return res.status(404).send(`No field name called '${field}'!`);
-    }
     const match = req.query.match;
     const n = req.query.n;
+    const { error } = superhero_util.validate_match(field,match,n);
+    if (error) return res.status(400).send(error.details[0].message);
     if (n !== undefined) {
-        const match_result = superhero_util.match(field, match, n);
+        match_result = superhero_util.match(field, match, n);
         if (match_result instanceof Error) return res.status(404).send(match_result.message);
-        res.send(match_result);
     }
     else {
-        const match_result = superhero_util.match(field, match);
+        match_result = superhero_util.match(field, match);
         if (match_result instanceof Error) return res.status(404).send(match_result.message);
-        res.send(match_result);
     }
+    res.send(match_result);
 });
 
 app.get("/api/superheros_info/:id", (req, res) => {
-    const superhero_info = superhero_util.get_info(req.params.id);
+    const id = Number(req.params.id);
+    const { error } = superhero_util.validate_id(id);
+    if (error) return res.status(400).send(error.details[0].message);
+    const superhero_info = superhero_util.get_info(id);
     if (superhero_info instanceof Error) return res.status(404).send(superhero_info.message);
     res.send(superhero_info);
 });
@@ -55,26 +44,43 @@ app.get("/api/superheros_powers", (req, res) => {
 });
 
 app.get("/api/superheros_powers/:id", (req, res) => {
-    const superhero_powers = superhero_util.get_powers(req.params.id)
+    const id = Number(req.params.id);
+    const { error } = superhero_util.validate_id(id);
+    if (error) return res.status(400).send(error.details[0].message);
+    const superhero_powers = superhero_util.get_powers(id);
     if (superhero_powers instanceof Error) return res.status(404).send(superhero_powers.message);
     res.send(superhero_powers);
 });
 
 app.get("/api/lists/ids", (req, res) => {
-    const name = req.query.name;
-    res.send(superhero_util.get_list_ids(name));
+    const name = req.query.name
+    const { error } = superhero_util.validate_name(name);
+    if (error) return res.status(400).send(error.details[0].message);
+    const list = superhero_util.get_list_ids(name)
+    if (list instanceof Error) return res.status(404).send(list.message);
+    res.send(list);
 });
 
 app.get("/api/lists/details", (req, res) => {
-    const list = superhero_util.get_details_from_list(req.query.id_list);
+    let id_list;
+    try {
+        id_list = JSON.parse(req.query.id_list);
+    } catch (ignored) {
+    }
+    const { error } = superhero_util.validate_id_list(id_list);
+    if (error) return res.status(400).send(error.details[0].message);
+    const list = superhero_util.get_details_from_list(id_list);
     if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
 })
 
 app.get("/api/lists/:name", (req, res) => {
-    const list = superhero_util.get_list(req.params.name)
-    if (list) return res.status(404).send(list.message);
-    res.send(superhero_util.get_list(list.message));
+    const name = req.params.name
+    const { error } = superhero_util.validate_name(name);
+    if (error) return res.status(400).send(error.details[0].message);
+    const list = superhero_util.get_list(name)
+    if (list instanceof Error) return res.status(404).send(list.message);
+    res.send(list);
 });
 
 app.post("/api/lists", (req, res) => {
@@ -83,7 +89,7 @@ app.post("/api/lists", (req, res) => {
     const name = req.body.name;
     const id_list = req.body.id_list;
     const list = superhero_util.create_list(name, id_list);
-    if (list) return res.status(404).send(list.message);
+    if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
 })
 
@@ -93,14 +99,16 @@ app.put("/api/lists", (req, res) => {
     const name = req.body.name;
     const id_list = req.body.id_list;
     const list = superhero_util.save_list(name, id_list)
-    if (list) return res.status(404).send(list.message);
+    if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
 })
 
 app.delete("/api/lists/:name", (req, res) => {
-    const name = req.params.name;
+    const name = req.params.name
+    const { error } = superhero_util.validate_name(name);
+    if (error) return res.status(400).send(error.details[0].message);
     const list = superhero_util.delete_list(name);
-    if (list) return res.status(404).send(list.message);
+    if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
 });
 
