@@ -1,7 +1,7 @@
-const { result } = require("lodash");
 const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
 const Joi = require("joi");
+const sanitize_html = require("sanitize-html");
 
 const info_adapter = new FileSync("../data/superhero_info.json");
 const info_db = low(info_adapter)
@@ -152,7 +152,7 @@ const validate_id_list = (id_list) => {
     return Joi.validate(superhero_object, schema);
 };
 
-const validate_match = (field,match,n) => {
+const validate_match = (field, match, n) => {
     const superhero_object = {
         field: field,
         match: match,
@@ -166,7 +166,22 @@ const validate_match = (field,match,n) => {
     return Joi.validate(superhero_object, schema);
 };
 
-
+const sanitize_user_input = (obj) => {
+    if (typeof obj === 'object') {
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === 'string') {
+                    obj[key] = sanitize_html(obj[key], {
+                        allowedTags: [],
+                        allowedAttributes: {}
+                    });
+                } else if (typeof obj[key] === 'object') {
+                    sanitize_user_input(obj[key]);
+                }
+            }
+        }
+    }
+};
 
 // console.log(get_all_info());
 // console.log(get_info(0));
@@ -184,6 +199,7 @@ const validate_match = (field,match,n) => {
 // console.log(get_details_from_list(ids));
 
 module.exports = {
+    sanitize_user_input,
     validate_match,
     validate_id_list,
     validate_id,

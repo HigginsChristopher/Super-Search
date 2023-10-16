@@ -2,7 +2,32 @@ const express = require("express");
 const superhero_util = require('./script.js');
 const app = express();
 const port = process.env.PORT || 3000;
+const validator = require('validator');
 app.use(express.json());
+
+  
+app.use((req, res, next) => {
+    let fullUrl = req.protocol + '://' + req.get('host') + unescape(req.originalUrl);
+    if(!validator.isURL(fullUrl,{require_tld: false})){
+        return res.status(404).send("URL is invalid!");
+    }
+
+    // Sanitize URL parameters
+    if (req.params) {
+        superhero_util.sanitize_user_input(req.params);
+    }
+    // Sanitize query strings
+    if (req.query) {
+        superhero_util.sanitize_user_input(req.query);
+    }
+
+    // Sanitize request body
+    if (req.body) {
+        superhero_util.sanitize_user_input(req.body);
+    }
+
+    next();
+});
 
 app.get("/api/superheros_info", (req, res) => {
     res.send(superhero_util.get_all_info());
@@ -17,7 +42,7 @@ app.get("/api/superheros_info/match", (req, res) => {
     const field = req.query.field;
     const match = req.query.match;
     const n = req.query.n;
-    const { error } = superhero_util.validate_match(field,match,n);
+    const { error } = superhero_util.validate_match(field, match, n);
     if (error) return res.status(400).send(error.details[0].message);
     if (n !== undefined) {
         match_result = superhero_util.match(field, match, n);
