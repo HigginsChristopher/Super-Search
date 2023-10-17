@@ -1,31 +1,18 @@
 const express = require("express");
 const superhero_util = require('./script.js');
-const app = express();
 const port = process.env.PORT || 3000;
-const validator = require('validator');
+const app = express();
+
+app.use("/static",express.static("../client/static"));
+app.use("/",express.static("../client/static/homepage"));
+
 app.use(express.json());
 
-  
 app.use((req, res, next) => {
-    let fullUrl = req.protocol + '://' + req.get('host') + unescape(req.originalUrl);
-    if(!validator.isURL(fullUrl,{require_tld: false})){
-        return res.status(404).send("URL is invalid!");
-    }
-
-    // Sanitize URL parameters
-    if (req.params) {
-        superhero_util.sanitize_user_input(req.params);
-    }
-    // Sanitize query strings
-    if (req.query) {
-        superhero_util.sanitize_user_input(req.query);
-    }
-
     // Sanitize request body
     if (req.body) {
         superhero_util.sanitize_user_input(req.body);
     }
-
     next();
 });
 
