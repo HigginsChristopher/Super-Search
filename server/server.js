@@ -3,8 +3,8 @@ const superhero_util = require('./script.js');
 const port = process.env.PORT || 3000;
 const app = express();
 
-app.use("/static",express.static("../client/static"));
-app.use("/",express.static("../client/static/homepage"));
+app.use("/",express.static("../client"));
+app.use("/",express.static("../client/homepage"));
 
 app.use(express.json());
 
