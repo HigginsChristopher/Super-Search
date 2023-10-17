@@ -171,10 +171,7 @@ const sanitize_user_input = (obj) => {
         for (const key in obj) {
             if (obj.hasOwnProperty(key)) {
                 if (typeof obj[key] === 'string') {
-                    obj[key] = sanitize_html(obj[key], {
-                        allowedTags: [],
-                        allowedAttributes: {}
-                    });
+                    obj[key] = sanitize_html(obj[key]);
                 } else if (typeof obj[key] === 'object') {
                     sanitize_user_input(obj[key]);
                 }
@@ -182,21 +179,6 @@ const sanitize_user_input = (obj) => {
         }
     }
 };
-
-// console.log(get_all_info());
-// console.log(get_info(0));
-// console.log(get_powers(0));
-// console.log(get_publishers());
-// console.log(match("name", "spider",2));
-// create_list("TEST1", [579, 580])
-// create_list("test1", [579,580])
-// let ids = get_list_ids("test1")
-// console.log(ids);
-// save_list("test1", [579])
-// ids = get_list_ids("test1")
-// console.log(ids);
-// delete_list("test1");
-// console.log(get_details_from_list(ids));
 
 module.exports = {
     sanitize_user_input,
