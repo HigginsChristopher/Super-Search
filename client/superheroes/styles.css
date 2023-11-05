@@ -33,3 +33,13 @@ body {
 #paragraph{
     padding: 10px;
 }
+
+/* Button div element */
+#button {
+    padding: 10px;
+}
+
+/* Button element */
+#homebutton {
+    font-size: 15px;
+}
