@@ -1,4 +1,4 @@
-// Method to trigger onload that displays all superhero information
+// Method to trigger onload that displays all superhero powers
 const onload = async () => {
     try {
         // Initializing DOM elements
