@@ -1,0 +1,35 @@
+/* List of name and info */
+#list {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 1em;
+    grid-auto-rows: minmax(100px, auto);
+    padding: 0px;
+}
+
+/* List element*/
+#list>li {
+    background-color: #eee;
+    padding: 1em;
+}
+
+/* Odd list element */
+#list>li:nth-child(odd) {
+    background-color: #ddd;
+}
+
+/* Entire body */
+body {
+    visibility: hidden;
+}
+
+/* Header element */
+#header{
+    margin: 20px 10px;
+}
+
+/* Pargraph element */
+#paragraph{
+    padding: 10px;
+}
