@@ -88,7 +88,7 @@ const match = (field, match, n = 734) => {
                 return new Error(`No power called '${match}'!`);
             }
             // If power is true and there can be more results
-            else if (superhero[match] === "True" && match_result.length <= n) {
+            else if (superhero[match] === "True" && match_result.length < n) {
                 const id = get_id(superhero.hero_names)
                 // If result is not instance of error, push it to results
                 if (!(id instanceof Error)) {
