@@ -77,21 +77,21 @@ const sortAlgorithm = () => {
     if (sort_field == "data-powers") {
         const power_to_heroes_map = {};
         // All objects have the same keys
-        const powersList = Object.keys(initial_powers[0]);
+        const powers_list = Object.keys(initial_powers[0]);
         // Remove the hero name key from the list of powers
-        const indexOfhero_names = powersList.indexOf("hero_names");
-        if (indexOfhero_names !== -1) {
-            powersList.splice(indexOfhero_names, 1);
+        const index_of_hero_names = powers_list.indexOf("hero_names");
+        if (index_of_hero_names !== -1) {
+            powers_list.splice(index_of_hero_names, 1);
         }
         // Initialize the values for each power with an hashmap
-        powersList.forEach(power => {
+        powers_list.forEach(power => {
             power_to_heroes_map[power] = [];
         });
         // Iterate through the data and populate the hashmap
-        initial_powers.forEach(heroData => {
-            const hero_name = heroData["hero_names"];
-            powersList.forEach(power => {
-                if (heroData[power] === "True") {
+        initial_powers.forEach(hero_data => {
+            const hero_name = hero_data["hero_names"];
+            powers_list.forEach(power => {
+                if (hero_data[power] === "True") {
                     power_to_heroes_map[power].push(hero_name);
                 }
             });
@@ -184,7 +184,7 @@ const display_content = () => {
         element.appendChild(document.createTextNode("Powers:"));
         list.appendChild(element);
         // Adding all superhero powers to list 
-        let result = initial_powers.find(currentHero => currentHero.hero_names === hero.name);
+        let result = initial_powers.find(current_hero => current_hero.hero_names === hero.name);
         if (result) {
             result = get_true_properties(result);
             let list2 = document.createElement("ul");
