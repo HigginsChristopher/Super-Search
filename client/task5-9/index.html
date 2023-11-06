@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>SE 3316 Lab 3</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+
+<body onload="onload()" class="body">
+    <h1 id="header">SE 3316 Lab 3 - Backend Task #5-9</h1>
+    <p>Custom List Manager:</p>
+    <p>Create List:</p>
+    <input type="text" class="input" id="nameinput" placeholder="Name...">
+    <input type="text" class="input" id="idinput" placeholder="IDs (e.g. 1,2,3)...">
+    <button type="button" class="button" id="superheroInfoButton" onclick="create_list()">Create</button>
+    <p>Update List:</p>
+    <form id="myForm1" onsubmit="update_list(event)">
+        <label for="field1">Select a list to update:</label>
+        <select id="field1">
+        </select>
+        <input type="text" class="input" id="updateidinput" placeholder="IDs (e.g. 1,2,3)...">
+        <button type="button" onclick="update_list(event)">Update</button>
+    </form>
+    <p>Delete List:</p>
+    <form id="myForm2" onsubmit="delete_list(event)">
+        <label for="field2">Select a list to delete:</label>
+        <select id="field2">
+        </select>
+        <button type="button" onclick="delete_list(event)">Delete</button>
+    </form>
+    <p>View List:</p>
+    <form id="myForm3" onsubmit="view_list(event)">
+        <label for="field3">Select a list to view:</label>
+        <select id="field3">
+        </select>
+        <button type="button" onclick="view_list(event)">View</button>
+    </form>
+    <p id="paragraph"></p>
+    <ul id="list">
+    </ul>
+
+    <div id="sort">
+        <p>Sorting Options:</p>
+        <select class="test" id="sort_field">
+            <option value="data-name">Sort by Name</option>
+            <option value="data-race">Sort by Race</option>
+            <option value="data-publisher">Sort by Publisher</option>
+            <option value="data-powers">Sort by Power</option>
+        </select>
+        <button onclick="sorting_algorithm()">Sort</button>
+        <br>
+        <br>
+    </div>
+    <div id="test">
+        <button type="button" class="button" id="homebutton" onclick="home()">Go Home!</button>
+    </div>
+
+
+</body>
+
+</html>

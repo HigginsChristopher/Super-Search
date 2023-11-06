@@ -1,0 +1,40 @@
+/* Entire body */
+body {
+    display: none;
+    padding: 0px 10px;
+}
+
+/* Soring elements */
+#sort {
+    display: none;
+}
+
+/* Header element */
+#header {
+    margin: 20px 0px;
+}
+
+/* List of superhero details */
+#list {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-gap: 1em;
+    padding: 0px;
+}
+
+/* List elements of superhero details*/
+#list>li {
+    background-color: #eee;
+    padding: 1em;
+}
+
+/* Odd list element */
+#list>li:nth-child(odd) {
+    background-color: #ddd;
+}
+
+/* Button element */
+#homebutton {
+    font-size: 15px;
+}
