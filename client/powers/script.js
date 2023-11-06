@@ -12,8 +12,8 @@ const onload = async () => {
         // Response is not ok (code 200)
         if (!resp.ok) {
             // Alert with response text
-            const errorText = await resp.text();
-            alert(errorText);
+            const error_text = await resp.text();
+            alert(error_text);
             return;
         }
         // Get JSON data from response

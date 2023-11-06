@@ -17,8 +17,8 @@ const onload = async () => {
             const resp = await fetch(url);
             // Response is not ok, display error message on screen
             if (!resp.ok) {
-                const errorText = await resp.text();
-                paragraph.appendChild(document.createTextNode(errorText));
+                const error_text = await resp.text();
+                paragraph.appendChild(document.createTextNode(error_text));
                 body.style.visibility = "visible";
                 return;
             }
