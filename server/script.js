@@ -217,7 +217,7 @@ const get_details_from_list = (id_list) => {
 const validate_update_list = (list) => {
     const schema = {
         id: Joi.number().integer().max(733).min(0).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer()).max(734).min(1).required()
+        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required()
     }
     return Joi.validate(list, schema);
 };
@@ -226,7 +226,7 @@ const validate_update_list = (list) => {
 const validate_create_list = (list) => {
     const schema = {
         name: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer()).max(734).min(1).required()
+        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required()
     }
     return Joi.validate(list, schema);
 };
