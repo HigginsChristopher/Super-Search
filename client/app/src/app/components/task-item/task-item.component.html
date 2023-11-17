@@ -1,0 +1,6 @@
+<div [ngClass]="{visibility: task.visibility}" class="task" (dblclick)="onToggle(task)">
+    <h3>{{"List-name: " +task["list-name"]}}
+        <fa-icon (click)="onDelete(task)" [ngStyle]="{'color': 'red'}" [icon]="faTimes"></fa-icon>
+    </h3>
+    <p>{{task.superhero_ids}}</p>
+</div>

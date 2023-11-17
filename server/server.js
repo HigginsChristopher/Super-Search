@@ -8,6 +8,14 @@ const port = process.env.PORT || 3000;
 const app = express();
 
 // MIDDLEWARE
+// Add this middleware to enable CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
 // Middleware to server task and homepage folders for access on client
 app.use("/", express.static("../client"));
 app.use("/", express.static("../client/homepage"));
@@ -140,8 +148,7 @@ app.get("/api/lists/details", (req, res) => {
     try {
         // Get id_list from query 
         id_list = JSON.parse(req.query.id_list);
-    } catch (ignored) {
-    }
+    } catch (ignored) { }
     // Validate id list (sanitize)
     const { error } = superhero_util.validate_id_list(id_list);
     // Validation raised error, return error message (400 client error)
@@ -176,10 +183,12 @@ app.post("/api/lists", (req, res) => {
     const { error } = superhero_util.validate_create_list(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     // Get name and id list from body
-    const name = req.body.name;
+    const name = req.body["list-name"];
     const superhero_ids = req.body.superhero_ids;
+    const description = req.body.description;
+    const visibility = req.body.visibility;
     // Create list with given name and id list
-    const list = superhero_util.create_list(name, superhero_ids);
+    const list = superhero_util.create_list(name, superhero_ids, description, visibility);
     // List name already exists, return error message (404 error)
     if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
@@ -192,15 +201,18 @@ app.route("/api/lists/:id")
         const list_object = {
             // Get id from params
             id: req.params.id,
+            "list-name": req.body["list-name"],
             // Get id list from body
-            superhero_ids: req.body.superhero_ids
+            superhero_ids: req.body.superhero_ids,
+            description: req.body.description,
+            visibility: req.body.visibility
         }
         // Validate update list details (sanitize)
         const { error } = superhero_util.validate_update_list(list_object);
         // Validation raised error, return error message (400 client error)
         if (error) return res.status(400).send(error.details[0].message);
         // Save list with given id and id list
-        const list = superhero_util.save_list(list_object.id, list_object.superhero_ids)
+        const list = superhero_util.save_list(list_object)
         // List with given ID doesn't exist, return error message (404 error)
         if (list instanceof Error) return res.status(404).send(list.message);
         res.send(list);

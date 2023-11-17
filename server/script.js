@@ -138,7 +138,7 @@ const get_list_id = (id) => {
 }
 
 // Method to create list with a given name and id_list
-const create_list = (name, id_list) => {
+const create_list = (name, id_list, description, visibility) => {
     // Check if list already exists
     const list = get_list_name(name);
     // List doesn't exist, create list
@@ -149,8 +149,9 @@ const create_list = (name, id_list) => {
         id_db.set('highestId', newHighestId)
             .write();
         // Create list and write to database
-        const newList = { "id": newHighestId, "list-name": name, "superhero_ids": id_list };
+        const newList = { "id": newHighestId, "list-name": name, "superhero_ids": id_list, "description": description, "visibility": visibility };
         list_db.get("lists").push(newList).write();
+        return newList;
     }
     // List exists, return error
     else {
@@ -159,12 +160,12 @@ const create_list = (name, id_list) => {
 };
 
 // Method to save list with a given id and id_list
-const save_list = (id, id_list) => {
+const save_list = (list_object) => {
     // Check if list already exists
-    const list = get_list_id(id);
+    const list = get_list_id(list_object.id);
     // List exists, save list
     if (!(list instanceof Error)) {
-        list.assign({ "superhero_ids": id_list }).write();
+        list.assign({ "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility}).write();
     }
     // List with given ID doesn't exist, return error
     else {
@@ -217,7 +218,10 @@ const get_details_from_list = (id_list) => {
 const validate_update_list = (list) => {
     const schema = {
         id: Joi.number().integer().max(733).min(0).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required()
+        ["list-name"]: Joi.string().max(100).min(1).required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required(),
+        description: Joi.string().allow('').max(1000).min(0).strict().required(),
+        visibility: Joi.boolean().required()
     }
     return Joi.validate(list, schema);
 };
@@ -225,8 +229,10 @@ const validate_update_list = (list) => {
 // Method to check validity of create list details
 const validate_create_list = (list) => {
     const schema = {
-        name: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required()
+        ["list-name"]: Joi.string().max(100).min(1).required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required(),
+        description: Joi.string().allow('').max(1000).min(0).strict().required(),
+        visibility: Joi.boolean().required()
     }
     return Joi.validate(list, schema);
 };
