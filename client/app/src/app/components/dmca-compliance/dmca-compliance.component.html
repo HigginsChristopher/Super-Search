@@ -1,0 +1,52 @@
+<!-- dmca-compliance.component.html -->
+<div class="form-control">
+    <h2>DMCA Compliance</h2>
+  
+    <!-- Security and Privacy Policy -->
+    <h3>Security and Privacy Policy</h3>
+    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">Security and Privacy Policy</a></p>
+    <!-- Acceptable Use Policy (AUP) -->
+    <h3>Acceptable Use Policy (AUP)</h3>
+    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">Acceptable Use Policy (AUP)</a></p>
+  
+    <!-- DMCA Notice & Takedown Policy -->
+    <h3>DMCA Notice & Takedown Policy</h3>
+    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">DMCA Notice & Takedown Policy</a></p>
+  
+    <!-- DMCA Takedown Procedure and Tools -->
+    <h3>DMCA Takedown Procedure and Tools</h3>
+    <!-- Document Workflow and Usage of Tools -->
+    <p>Document describing the workflow and usage of tools.</p>
+  
+    <!-- DMCA Entry Interface -->
+    <h4>DMCA Entry Interface</h4>
+    <!-- Interface to set properties for each review -->
+    <!-- Example: Set up a form for entering details -->
+    <!-- You can add additional fields as needed -->
+    <form (ngSubmit)="submitDmcaEntry()">
+      <label for="dateReceived">Date Request Received:</label>
+      <input type="date" id="dateReceived" name="dateReceived" required>
+  
+      <label for="dateNoticeSent">Date Notice Sent:</label>
+      <input type="date" id="dateNoticeSent" name="dateNoticeSent" required>
+  
+      <label for="dateDisputeReceived">Date Dispute Received:</label>
+      <input type="date" id="dateDisputeReceived" name="dateDisputeReceived" required>
+  
+      <label for="notes">Notes:</label>
+      <textarea id="notes" name="notes"></textarea>
+  
+      <label for="status">Status:</label>
+      <select id="status" name="status" required>
+        <option value="Active">Active</option>
+        <option value="Processed">Processed</option>
+      </select>
+  
+      <button type="submit">Submit DMCA Entry</button>
+    </form>
+  
+    <!-- Tools for hiding and restoring reviews -->
+    <h4>Tools for Review Management</h4>
+    <button (click)="hideReviews()">Hide Reviews with Violations</button>
+    <button (click)="restoreReviews()">Restore Contested Reviews</button>
+  </div>
