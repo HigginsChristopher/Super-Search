@@ -1,0 +1,8 @@
+.resend-link {
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
+  }
+.smallText{
+  font-size: medium;
+}
