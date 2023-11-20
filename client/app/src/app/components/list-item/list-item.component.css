@@ -1,0 +1,17 @@
+.list {
+    background: #f4f4f4;
+    margin: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.list.visibility {
+    border-left: 5px solid green;
+}
+
+.list h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

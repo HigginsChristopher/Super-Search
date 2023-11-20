@@ -1,0 +1,17 @@
+<div [ngClass]="{visibility: list.visibility}" class="list" (dblclick)="toggleExpand(list)"
+    (mousedown)="startLongPressTimer($event,list)" (mouseup)="clearLongPressTimer()"
+    (mouseleave)="clearLongPressTimer()" [class.expandable]="!expanded">
+    <h3>{{"List-name: " +list["list-name"]}}
+        <fa-icon (click)="onDelete(list)" [ngStyle]="{'color': 'red'}" [icon]="faTimes"></fa-icon>
+    </h3>
+
+    <div *ngIf="expanded" class="list">
+        {{"Description: " + list.description}}
+        <ul>
+            <li *ngFor="let superhero of superheroes">
+                {{ "Name: " +superhero.name+" - Publisher: "+superhero.Publisher}}
+                <fa-icon (click)="onDeleteSuperhero(list, superhero)" [ngStyle]="{'color': 'red'}" [icon]="faTimes"></fa-icon>
+            </li>
+        </ul>
+    </div>
+</div>
