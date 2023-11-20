@@ -1,8 +1,24 @@
 <header>
     <h1>{{title}}</h1>
-    <app-button 
-    *ngIf = "hasRoute('/')"
-    color = "{{showAddTask ? 'red' : 'green'}}"
-    text = "{{showAddTask ? 'Close' : 'Add'}}"
-    (btnClick)="toggleAddTask()"></app-button>
+    <app-button *ngIf="hasRoute('/lists')" color="{{showAddList ? 'red' : 'green'}}"
+        text="{{showAddList? 'Close' : 'Add'}}" (btnClick)="toggleAddList()">
+    </app-button>
 </header>
+<div *ngIf="hasRoute('/')">
+    <div *ngIf="!user">
+        <app-button color="steelblue" text="Login" (btnClick)="routeLogin()">
+        </app-button>
+    </div>
+    <div *ngIf="user">
+        <app-button color="steelblue" text="Logout" (btnClick)="routeLogout()">
+        </app-button>
+    </div>
+    <div>
+        <app-button color="steelblue" text="Hero Search" (btnClick)="routeHero()">
+        </app-button>
+    </div>
+    <div>
+        <app-button color="steelblue" text="Manage Lists" (btnClick)="routeLists()">
+        </app-button>
+    </div>
+</div>
