@@ -2,10 +2,37 @@
 const express = require("express");
 const superhero_util = require('./script.js');
 const validator = require("validator");
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Setting up port and express application
 const port = process.env.PORT || 3000;
 const app = express();
+
+// Generate a random key
+const generateRandomKey = () => {
+    return crypto.randomBytes(64).toString('hex');
+};
+
+const secretKey = generateRandomKey();
+// Middleware to authenticate JWT token
+
+const authenticateToken = (req, res, next) => {
+    const token = req.header('Authorization');
+
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    jwt.verify(token, secretKey, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        req.user = user;
+        next();
+    });
+};
 
 // MIDDLEWARE
 // Add this middleware to enable CORS
@@ -43,6 +70,49 @@ app.use((req, res, next) => {
 });
 
 // ENDPOINTS
+
+// Authentication endpoint
+app.post('/api/login', async (req, res) => {
+    const test =
+    {
+        email: req.body.email,
+        password: req.body.password
+    };
+    const user = await superhero_util.get_user(test);
+    if (!(user instanceof Error)) {
+        // Generate JWT token
+        const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
+        user.jwtToken = token;
+        res.json({ user });
+    } else {
+        res.status(401).json({ message: user.message });
+    }
+});
+
+// Registration endpoint
+app.post('/api/register', async (req, res) => {
+    const user = await superhero_util.create_user(req.body);
+    if (!(user instanceof Error)) {
+        // Generate JWT token
+        const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
+        user.jwtToken = token;
+        res.json({ user });
+    } else {
+        res.status(401).json({ message: user.message });
+    }
+});
+
+app.get('/api/verify', (req, res) => {
+    const user = superhero_util.verify_user(req.query.token);
+    if (!(user instanceof Error)) {
+        // Return a response indicating successful verification
+        res.json({ message: 'Email verified successfully' });
+    } else {
+        // Return a response indicating unsuccessful verification
+        res.status(400).json({ message: 'Invalid verification token' });
+    }
+});
+
 // Endpoint to GET all superhero info
 app.get("/api/superheros_info", (req, res) => {
     res.send(superhero_util.get_all_info());

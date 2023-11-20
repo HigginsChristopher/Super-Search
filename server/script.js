@@ -3,6 +3,7 @@ const low = require("lowdb");
 const Joi = require("joi");
 const FileSync = require("lowdb/adapters/FileSync");
 const sanitize_html = require("sanitize-html");
+const crypto = require("crypto");
 
 // Superhero info database and syncing it with an adapter
 const info_adapter = new FileSync("../data/superhero_info.json");
@@ -19,6 +20,12 @@ const list_adapter = new FileSync("../data/superhero_lists.json");
 const list_db = low(list_adapter)
 list_db.read();
 
+// Superhero lists database and syncing it with an adapter
+const user_adapter = new FileSync("../data/users.json");
+const user_db = low(user_adapter)
+user_db.read();
+list_db.defaults({ users: [] }).write();
+
 // Default if superhero_lists.json doesn't exists
 list_db.defaults({ lists: [] }).write();
 
@@ -32,6 +39,59 @@ id_db.defaults({ "highestId": -1 }).write();
 
 // Method to get all superhero info
 const get_all_info = () => info_db.get("content").value();
+
+const bcrypt = require('bcrypt');
+
+const saltRounds = 10; // Salt rounds for bcrypt (adjust as needed)
+
+// Hash the password before storing it in the database
+const hashPassword = async (password) => {
+    try {
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        return hashedPassword;
+    } catch (error) {
+        throw error;
+    }
+};
+// Compare the user-provided password with the stored hashed password
+const comparePasswords = async (userProvidedPassword, storedHashedPassword) => {
+    try {
+        const isPasswordMatch = await bcrypt.compare(userProvidedPassword, storedHashedPassword);
+        return isPasswordMatch;
+    } catch (error) {
+        throw error;
+    }
+};
+const get_user = async (user) => {
+    const info = user_db.get("users").find({ "email": user.email }).value();
+    if (info === undefined) return new Error(`No users for given email.`)
+    const approve = await comparePasswords(user.password, info.password)
+    // Return error if no result for given id
+    if (!approve) return new Error(`Wrong password.`)
+    if(!info.activated) return new Error(`Account not enabled! Ensure email is verified, otherwise contact an adminstrator.`)
+    return info;
+}
+
+const create_user = async (user) => {
+    const username = user_db.get("users").find({ "username": user.username }).value();
+    if (username !== undefined) return new Error(`Username already taken`);
+    const email = user_db.get("users").find({ "email": user.email }).value();
+    if (email !== undefined) return new Error(`Email already taken`);
+    const hash = await hashPassword(user.password);
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    const newUser = { "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, activated: false };
+    user_db.get("users").push(newUser).write();
+    return newUser;
+}
+
+const verify_user = token => {
+    const userToUpdate = user_db.get('users').find({ 'verificationToken': token });
+    if (!userToUpdate.value()) return new Error(`Verification Token not found`);
+    userToUpdate.assign({ 'activated': true }).write();
+    const updatedUser = userToUpdate.value();
+    return updatedUser;
+}
 
 // Method to get superhero info for a specified id
 const get_info = id => {
@@ -165,7 +225,7 @@ const save_list = (list_object) => {
     const list = get_list_id(list_object.id);
     // List exists, save list
     if (!(list instanceof Error)) {
-        list.assign({ "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility}).write();
+        list.assign({ "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility }).write();
     }
     // List with given ID doesn't exist, return error
     else {
@@ -219,7 +279,7 @@ const validate_update_list = (list) => {
     const schema = {
         id: Joi.number().integer().max(733).min(0).required(),
         ["list-name"]: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).unique().strict().required(),
         description: Joi.string().allow('').max(1000).min(0).strict().required(),
         visibility: Joi.boolean().required()
     }
@@ -230,7 +290,7 @@ const validate_update_list = (list) => {
 const validate_create_list = (list) => {
     const schema = {
         ["list-name"]: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(1).max(734)).strict().required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).unique().strict().required(),
         description: Joi.string().allow('').max(1000).min(0).strict().required(),
         visibility: Joi.boolean().required()
     }
@@ -265,7 +325,7 @@ const validate_id_list = (id_list) => {
         id_list: id_list
     }
     const schema = {
-        id_list: Joi.array().items(Joi.number().integer()).max(734).min(1).required()
+        id_list: Joi.array().items(Joi.number().integer()).max(734).min(0).required()
     }
     return Joi.validate(superhero_object, schema);
 };
@@ -311,6 +371,7 @@ const capitalize_words = (str) => {
 
 // Exporting methods for usage inside server.js
 module.exports = {
+    create_user,
     get_all_lists,
     sanitize_user_input,
     validate_match,
@@ -330,5 +391,9 @@ module.exports = {
     get_all_powers,
     get_powers,
     get_publishers,
-    match
+    match,
+    hashPassword,
+    get_user,
+    create_user,
+    verify_user
 };
