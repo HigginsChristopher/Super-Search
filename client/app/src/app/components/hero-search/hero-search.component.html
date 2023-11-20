@@ -1,0 +1,32 @@
+<!-- hero-search.component.html -->
+<div class="form-control">
+    <form (ngSubmit)="onSearch()">
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" [(ngModel)]="searchCriteria.name">
+      </div>
+      <div class="form-group">
+        <label for="race">Race:</label>
+        <input type="text" id="race" name="race" [(ngModel)]="searchCriteria.race">
+      </div>
+      <div class="form-group">
+        <label for="power">Power:</label>
+        <input type="text" id="power" name="power" [(ngModel)]="searchCriteria.power">
+      </div>
+      <div class="form-group">
+        <label for="publisher">Publisher:</label>
+        <input type="text" id="publisher" name="publisher" [(ngModel)]="searchCriteria.publisher">
+      </div>
+      <app-button color="steelblue" text="Search" (btnClick)="onSearch()" type="submit"></app-button>
+    </form>
+  
+    <!-- Display search results -->
+    <div *ngIf="searchResults.length > 0" class="search-results">
+      <h3>Search Results</h3>
+      <ul>
+        <li *ngFor="let hero of searchResults">
+          <strong>{{ hero.name }}</strong> - {{ hero.publisher }}
+        </li>
+      </ul>
+    </div>
+  </div>
