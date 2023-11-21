@@ -24,7 +24,7 @@ list_db.read();
 const user_adapter = new FileSync("../data/users.json");
 const user_db = low(user_adapter)
 user_db.read();
-list_db.defaults({ users: [] }).write();
+user_db.defaults({ users: [] }).write();
 
 // Default if superhero_lists.json doesn't exists
 list_db.defaults({ lists: [] }).write();
@@ -41,6 +41,7 @@ id_db.defaults({ "highestId": -1 }).write();
 const get_all_info = () => info_db.get("content").value();
 
 const bcrypt = require('bcrypt');
+const { time } = require("console");
 
 const saltRounds = 10; // Salt rounds for bcrypt (adjust as needed)
 
@@ -69,7 +70,7 @@ const get_user = async (user) => {
     const approve = await comparePasswords(user.password, info.password)
     // Return error if no result for given id
     if (!approve) return new Error(`Wrong password.`)
-    if(!info.activated) return new Error(`Account not enabled! Ensure email is verified, otherwise contact an adminstrator.`)
+    if (!info.activated) return new Error(`Account not enabled! Ensure email is verified, otherwise contact an adminstrator.`)
     return info;
 }
 
@@ -208,8 +209,9 @@ const create_list = (name, id_list, description, visibility) => {
         const newHighestId = currentHighestId + 1;
         id_db.set('highestId', newHighestId)
             .write();
+        const timestamp = Date.now();
         // Create list and write to database
-        const newList = { "id": newHighestId, "list-name": name, "superhero_ids": id_list, "description": description, "visibility": visibility };
+        const newList = { "id": newHighestId, "list-name": name, "superhero_ids": id_list, "description": description, "visibility": visibility, "modified": timestamp };
         list_db.get("lists").push(newList).write();
         return newList;
     }
@@ -225,7 +227,8 @@ const save_list = (list_object) => {
     const list = get_list_id(list_object.id);
     // List exists, save list
     if (!(list instanceof Error)) {
-        list.assign({ "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility }).write();
+        const timestamp = Date.now();
+        list.assign({ "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp }).write();
     }
     // List with given ID doesn't exist, return error
     else {
@@ -233,17 +236,17 @@ const save_list = (list_object) => {
     }
 };
 
-// Method to get list ids for a given name
-const get_list_ids = (name) => {
+// Method to get list ids for a given id
+const get_list_ids = (id) => {
     // Check if list already exists
-    const list = get_list_name(name);
+    const list = get_list_id(id);
     // List exists, return ids
     if (!(list instanceof Error)) {
         return list.value()["superhero_ids"];
     }
     // List name doesn't exist, return error
     else {
-        return new Error("List-name doesn't exist!");
+        return new Error("List ID doesn't exist!");
     }
 };
 
@@ -273,6 +276,18 @@ const get_details_from_list = (id_list) => {
     // Convert back to array
     return Array.from(results);
 }
+
+const get_recent_public_lists = () => {
+    const publicLists = list_db.get('lists').filter({ visibility: true }).value();
+
+    // Sort the public lists by timestamp in descending order
+    const sortedPublicLists = publicLists.sort((a, b) => b.modified - a.modified);
+
+    // Get the first 10 lists
+    const recentPublicLists = sortedPublicLists.slice(0, 10);
+
+    return recentPublicLists;
+};
 
 // Method to check validity of update list details
 const validate_update_list = (list) => {
@@ -395,5 +410,6 @@ module.exports = {
     hashPassword,
     get_user,
     create_user,
-    verify_user
+    verify_user,
+    get_recent_public_lists
 };
