@@ -10,11 +10,13 @@ const port = process.env.PORT || 3000;
 const app = express();
 
 // Generate a random key
-const generateRandomKey = () => {
-    return crypto.randomBytes(64).toString('hex');
-};
+// const generateRandomKey = () => {
+//     return crypto.randomBytes(64).toString('hex');
+// };
+//const secretKey = generateRandomKey();
 
-const secretKey = generateRandomKey();
+const secretKey = "c25a959c1565f04b62c983c9e7413bff2bf873db9a1460a2e91c97f14c092cd982c26a8dcb8ff018b785e77214056efd55425ae4107e1fb6836e35649aeab2b8";
+
 // Middleware to authenticate JWT token
 
 const authenticateToken = (req, res, next) => {
