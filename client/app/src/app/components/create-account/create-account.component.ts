@@ -68,7 +68,7 @@ export class CreateAccountComponent implements OnInit {
   }
 
   createMockEmail(string=""): void {
-    const url = `http://localhost:3000/api/verify?token=${this.createdUser?.verificationToken}`
+    const url = `http://localhost:3000/api/open/verify?token=${this.createdUser?.verificationToken}`
     this.mockEmail = `
       Mock Email:
       From: Do Not Reply <myEmail@myService.myDomain>

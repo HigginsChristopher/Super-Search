@@ -18,12 +18,12 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   registerUser(user: User): Observable<User> {
-    const url = `${this.apiUrl}register`;
+    const url = `${this.apiUrl}open/register`;
     return this.http.post<User>(url, user, httpOptions);
   }
 
   loginUser(user: any): Observable<User> {
-    const url = `${this.apiUrl}login`;
+    const url = `${this.apiUrl}open/login`;
     return this.http.post<User>(url, user, httpOptions);
   }
 
