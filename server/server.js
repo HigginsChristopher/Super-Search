@@ -3,12 +3,12 @@ const express = require("express");
 const superhero_util = require('./script.js');
 const validator = require("validator");
 const jwt = require('jsonwebtoken');
-//const crypto = require('crypto');
 
 // Setting up port and express application
 const port = process.env.PORT || 3000;
 const app = express();
 
+//const crypto = require('crypto');
 // Generate a random key
 // const generateRandomKey = () => {
 //     return crypto.randomBytes(64).toString('hex');
@@ -69,7 +69,7 @@ app.use((req, res, next) => {
 
 // ENDPOINTS
 // Endpoint to GET all list info
-app.get("/api/secure/lists", authenticateToken,(req, res) => {
+app.get("/api/secure/lists", authenticateToken, (req, res) => {
     res.send(superhero_util.get_all_lists());
 });
 
@@ -208,7 +208,6 @@ app.get("/api/open/lists/details", (req, res) => {
     res.send(list);
 })
 
-// Endpoint to GET all superhero and power info for a given list of ids
 app.get("/api/open/lists/", (req, res) => {
     // Get details for given id_list
     const lists = superhero_util.get_recent_public_lists(req.body);
@@ -218,19 +217,19 @@ app.get("/api/open/lists/", (req, res) => {
     res.send(lists);
 })
 
-
 // Endpoint to POST, in this case create, list for given name and id_list
-app.post("/api/secure/lists", authenticateToken,(req, res) => {
+app.post("/api/secure/lists/", authenticateToken, (req, res) => {
     // Validate create list details (sanitize)
     const { error } = superhero_util.validate_create_list(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     // Get name and id list from body
+    const user_id = req.body.user_id;
     const name = req.body["list-name"];
     const superhero_ids = req.body.superhero_ids;
     const description = req.body.description;
     const visibility = req.body.visibility;
     // Create list with given name and id list
-    const list = superhero_util.create_list(name, superhero_ids, description, visibility);
+    const list = superhero_util.create_list(user_id, name, superhero_ids, description, visibility);
     // List name already exists, return error message (404 error)
     if (list instanceof Error) return res.status(404).send(list.message);
     res.send(list);
@@ -238,8 +237,16 @@ app.post("/api/secure/lists", authenticateToken,(req, res) => {
 
 // Route to handle /api/lists/:id with a given id parameter
 app.route("/api/secure/lists/:id")
+    .get(authenticateToken, (req, res) => {
+        // Get details for given id_list
+        const lists = superhero_util.get_lists(req.params.id);
+        // No id matches, return error message (404 error)
+        if (lists instanceof Error) return res.status(404).send(lists.message);
+        // Send details to client
+        res.send(lists);
+    })
     // Endpoint to POST, in this case update, a list with the given id and id_list
-    .post(authenticateToken,(req, res) => {
+    .post(authenticateToken, (req, res) => {
         const list_object = {
             // Get id from params
             id: req.params.id,
