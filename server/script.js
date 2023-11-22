@@ -35,7 +35,7 @@ const id_db = low(id_adapter)
 id_db.read();
 
 // Default if ids.json doesn't exists
-id_db.defaults({ "highestId": -1 }).write();
+id_db.defaults({ "highestUserId": -1 }).write();
 
 // Method to get all superhero info
 const get_all_info = () => info_db.get("content").value();
@@ -81,7 +81,12 @@ const create_user = async (user) => {
     if (email !== undefined) return new Error(`Email already taken`);
     const hash = await hashPassword(user.password);
     const verificationToken = crypto.randomBytes(20).toString('hex');
-    const newUser = { "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, activated: false };
+    // Get new highest id and update id database
+    const currentHighestId = id_db.get('highestUserId').value();
+    const newHighestId = currentHighestId + 1;
+    id_db.set('highestUserId', newHighestId)
+        .write();
+    const newUser = { "id": currentHighestId, "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, activated: false };
     user_db.get("users").push(newUser).write();
     return newUser;
 }
@@ -179,12 +184,23 @@ const match = (field, match, n = 734) => {
 }
 
 // Method to get all lists
-const get_all_lists = () => list_db.get("lists").value();
+const get_lists = (id) => {
+    const lists = list_db.get("lists");
+
+    result = lists
+        .filter(list => {
+            return list.user_id == id
+        })
+        .take(20)
+        .value();
+
+    return result;
+}
 
 
 // Method to get list for a given name
-const get_list_name = (name) => {
-    const list = list_db.get("lists").find(list => list["list-name"].toLowerCase() == name.toLowerCase());
+const get_list_name = (name, user_id) => {
+    const list = list_db.get("lists").find(list => list["list-name"].toLowerCase() == name.toLowerCase() && list.user_id == user_id);
     // Return error if no result for given name
     if (list.value() === undefined) return new Error(`No list result for given name: ${name}`);
     return list;
@@ -199,25 +215,30 @@ const get_list_id = (id) => {
 }
 
 // Method to create list with a given name and id_list
-const create_list = (name, id_list, description, visibility) => {
+const create_list = (user_id, name, id_list, description, visibility) => {
     // Check if list already exists
-    const list = get_list_name(name);
+    const list = get_list_name(name,user_id);
     // List doesn't exist, create list
     if (list instanceof Error) {
-        // Get new highest id and update id database
-        const currentHighestId = id_db.get('highestId').value();
-        const newHighestId = currentHighestId + 1;
-        id_db.set('highestId', newHighestId)
-            .write();
+        const lists = list_db.get("lists");
+
+        result = lists
+            .filter(list => {
+                return list.user_id == user_id
+            })
+            .value();
+        if (result.length == 20) {
+            return new Error("Users can only have 20 lists!");
+        }
         const timestamp = Date.now();
         // Create list and write to database
-        const newList = { "id": newHighestId, "list-name": name, "superhero_ids": id_list, "description": description, "visibility": visibility, "modified": timestamp };
+        const newList = { "user_id": user_id, "list-name": name, "superhero_ids": id_list, "description": description, "visibility": visibility, "modified": timestamp };
         list_db.get("lists").push(newList).write();
         return newList;
     }
     // List exists, return error
     else {
-        return new Error("List-name already exists!");
+        return new Error("List-name already exists for user!");
     }
 };
 
@@ -304,6 +325,7 @@ const validate_update_list = (list) => {
 // Method to check validity of create list details
 const validate_create_list = (list) => {
     const schema = {
+        user_id: Joi.number().integer().max(733).min(0).required(),
         ["list-name"]: Joi.string().max(100).min(1).required(),
         superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).unique().strict().required(),
         description: Joi.string().allow('').max(1000).min(0).strict().required(),
@@ -387,7 +409,7 @@ const capitalize_words = (str) => {
 // Exporting methods for usage inside server.js
 module.exports = {
     create_user,
-    get_all_lists,
+    get_lists,
     sanitize_user_input,
     validate_match,
     validate_id_list,
