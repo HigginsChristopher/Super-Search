@@ -119,32 +119,11 @@ const get_info_id = id => {
     return info;
 }
 
-// Method to get superhero id for a specified name
-const get_info_name = name => {
-    const info = info_db.get("content").find({ "name": name }).value();
-    // Return error if no result for given name
-    if (info === undefined) return new Error(`No superhero info for given name: ${name}`)
-    return info.id;
-}
-
 // Method to get superhero powers for a specified id
 const get_powers_id = id => {
     const name = get_info_id(id).name
     const powers = structuredClone(powers_db.get("content").find({ "hero_names": name }).value());
     // Return error if no result for given name
-    if (powers === undefined) return {};
-    delete powers.hero_names;
-    // Filter out powers that are not true
-    const filteredPowers = Object.fromEntries(
-        Object.entries(powers).filter(([key, value]) => value === "True")
-    );
-    return filteredPowers;
-}
-
-// Method to get superhero powers for a specified id
-const get_powers_name = name => {
-    const powers = structuredClone(powers_db.get("content").find({ "hero_names": name }).value());
-    // Return powers for given name
     if (powers === undefined) return {};
     delete powers.hero_names;
     // Filter out powers that are not true
@@ -290,6 +269,14 @@ const get_details_id_list = (id_list) => {
 
 }
 
+// Method to get details from a given id
+const get_details_id = (id) => {
+    const hero = get_info_id(id);
+    hero.powers = get_powers_id(id);
+    hero.powers = hero.powers ? Object.keys(hero.powers).filter(power => hero.powers[power]) : [];
+    return hero;
+}
+
 const get_recent_public_lists = () => {
     const publicLists = list_db.get('lists').filter({ visibility: true }).value();
 
@@ -306,7 +293,7 @@ const get_recent_public_lists = () => {
 const get_all_info = () => {
     const superheroes = info_db.get("content").value();
     for (const superhero of superheroes) {
-        const powers = get_powers_name(superhero.name);
+        const powers = get_powers_id(superhero.id);
         superhero.powers = powers;
     }
     const flattenedHeroes = superheroes.map(hero => {
@@ -409,8 +396,8 @@ module.exports = {
     get_list_id,
     delete_list,
     get_details_id_list,
+    get_details_id,
     get_all_info,
-    get_info_name,
     get_info_id,
     get_powers_id,
     get_publishers,
