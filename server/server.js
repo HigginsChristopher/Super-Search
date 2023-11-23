@@ -100,7 +100,7 @@ app.get('/api/open/verify', (req, res) => {
 app.route("/api/secure/lists/")
     // get private lists
     .get(authenticateToken, (req, res) => {
-        const lists = superhero_util.get_lists(req.user.user_id);
+        const lists = superhero_util.get_private_lists(req.user.user_id);
         res.send(lists);
     })
     // create private list
@@ -191,6 +191,7 @@ app.get("/api/open/superheros_powers/:id", (req, res) => {
     // Send power information result to client
     res.send(superhero_powers);
 });
+
 // Endpoint to GET all superhero and power info for a given list of ids
 app.get("/api/open/lists/details", (req, res) => {
     let id_list;
@@ -204,30 +205,12 @@ app.get("/api/open/lists/details", (req, res) => {
     // Validation raised error, return error message (400 client error)
     if (error) return res.status(400).send(error.details[0].message);
     // Get details for given id_list
-    const list = superhero_util.get_details_from_list(id_list);
+    const list = superhero_util.get_details_id_list(id_list);
     // No id matches, return error message (404 error)
     if (list instanceof Error) return res.status(404).send(list.message);
     // Send details to client
     res.send(list);
 })
-
-// Endpoint to GET list_id for a given list id
-app.get("/api/open/lists/:id", (req, res) => {
-    // Decode name (can have special characters)
-    const id = req.query.id;
-    // Validate name (sanitize)
-    const { error } = superhero_util.validate_id(id);
-    // Validation raised error, return error message (400 client error)
-    if (error) return res.status(400).send(error.details[0].message);
-    // Get list_id for given name
-    const list = superhero_util.get_list_ids(id)
-    // No name matches, return error message (404 error)
-    if (list instanceof Error) return res.status(404).send(list.message);
-    // Send id_list to client
-    res.send(list);
-});
-
-
 
 // Listening to application and displaying port number
 app.listen(port, () => console.log(`Listening on port ${port}...`));

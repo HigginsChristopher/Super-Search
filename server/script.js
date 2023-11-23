@@ -21,15 +21,14 @@ powers_db.read();
 const list_adapter = new FileSync("../data/superhero_lists.json");
 const list_db = low(list_adapter)
 list_db.read();
+// Default if superhero_lists.json doesn't exists
+list_db.defaults({ lists: [] }).write();
 
 // Superhero lists database and syncing it with an adapter
 const user_adapter = new FileSync("../data/users.json");
 const user_db = low(user_adapter)
 user_db.read();
 user_db.defaults({ users: [] }).write();
-
-// Default if superhero_lists.json doesn't exists
-list_db.defaults({ lists: [] }).write();
 
 // ID database for lists and syncing it with an adapter
 const id_adapter = new FileSync("../data/ids.json");
@@ -39,8 +38,23 @@ id_db.read();
 // Default if ids.json doesn't exists
 id_db.defaults({ "highestUserId": -1, "highestListId": -1 }).write();
 
-const saltRounds = 10; // Salt rounds for bcrypt (adjust as needed)
+// Method to sanitize objects contents, remove HTML, JS and CSS elements #EXTRA LAYER
+const sanitize_user_input = (obj) => {
+    if (typeof obj === 'object') {
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (typeof obj[key] === 'string') {
+                    obj[key] = sanitize_html(decodeURIComponent(obj[key]));
+                } else if (typeof obj[key] === 'object') {
+                    sanitize_user_input(obj[key]);
+                }
+            }
+        }
+    }
+};
 
+// Salt rounds for bcrypt
+const saltRounds = 10;
 // Hash the password before storing it in the database
 const hashPassword = async (password) => {
     try {
@@ -51,6 +65,7 @@ const hashPassword = async (password) => {
         throw error;
     }
 };
+
 // Compare the user-provided password with the stored hashed password
 const comparePasswords = async (userProvidedPassword, storedHashedPassword) => {
     try {
@@ -60,6 +75,7 @@ const comparePasswords = async (userProvidedPassword, storedHashedPassword) => {
         throw error;
     }
 };
+
 const get_user = async (user) => {
     const info = user_db.get("users").find({ "email": user.email }).value();
     if (info === undefined) return new Error(`No users for given email.`)
@@ -110,7 +126,6 @@ const get_info_name = name => {
     if (info === undefined) return new Error(`No superhero info for given name: ${name}`)
     return info.id;
 }
-
 
 // Method to get superhero powers for a specified id
 const get_powers_id = id => {
@@ -173,7 +188,7 @@ const match = (filters, limit = 734) => {
 }
 
 // Method to get all lists
-const get_lists = (id) => {
+const get_private_lists = (id) => {
     const lists = list_db.get("lists");
     result = lists
         .filter(list => {
@@ -184,7 +199,6 @@ const get_lists = (id) => {
 
     return result;
 }
-
 
 // Method to get list for a given name
 const get_list_name = (name, user_id) => {
@@ -249,20 +263,6 @@ const save_list = (list_object) => {
     }
 };
 
-// Method to get list ids for a given id
-const get_list_ids = (id) => {
-    // Check if list already exists
-    const list = get_list_id(id);
-    // List exists, return ids
-    if (!(list instanceof Error)) {
-        return list.value()["superhero_ids"];
-    }
-    // List name doesn't exist, return error
-    else {
-        return new Error("List ID doesn't exist!");
-    }
-};
-
 // Method to delete list for a given id
 const delete_list = (user_id, name) => {
     // Check if list already exists
@@ -277,8 +277,7 @@ const delete_list = (user_id, name) => {
 };
 
 // Method to get details from a given id_list
-const get_details_from_list = (id_list) => {
-    // No detail duplicates (set)
+const get_details_id_list = (id_list) => {
     let results = []
     for (let i = 0; i < id_list.length; i++) {
         const hero = get_info_id(id_list[i]);
@@ -301,6 +300,24 @@ const get_recent_public_lists = () => {
     const recentPublicLists = sortedPublicLists.slice(0, 10);
 
     return recentPublicLists;
+};
+
+// Method to get all superhero info
+const get_all_info = () => {
+    const superheroes = info_db.get("content").value();
+    for (const superhero of superheroes) {
+        const powers = get_powers_name(superhero.name);
+        superhero.powers = powers;
+    }
+    const flattenedHeroes = superheroes.map(hero => {
+        const powersArray = hero.powers ? Object.keys(hero.powers).filter(power => hero.powers[power]) : [];
+        return {
+            ...hero,
+            powers: powersArray,
+        };
+    });
+
+    return flattenedHeroes;
 };
 
 // Method to check validity of update list details
@@ -376,43 +393,10 @@ const validate_match = (field, match, n) => {
     return Joi.validate(superhero_object, schema);
 };
 
-// Method to sanitize objects contents, remove HTML, JS and CSS elements #EXTRA LAYER
-const sanitize_user_input = (obj) => {
-    if (typeof obj === 'object') {
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                if (typeof obj[key] === 'string') {
-                    obj[key] = sanitize_html(decodeURIComponent(obj[key]));
-                } else if (typeof obj[key] === 'object') {
-                    sanitize_user_input(obj[key]);
-                }
-            }
-        }
-    }
-};
-
-// Method to get all superhero info
-const get_all_info = () => {
-    const superheroes = info_db.get("content").value();
-    for (const superhero of superheroes) {
-        const powers = get_powers_name(superhero.name);
-        superhero.powers = powers;
-    }
-    const flattenedHeroes = superheroes.map(hero => {
-        const powersArray = hero.powers ? Object.keys(hero.powers).filter(power => hero.powers[power]) : [];
-        return {
-            ...hero,
-            powers: powersArray,
-        };
-    });
-    
-    return flattenedHeroes;
-};
-
 // Exporting methods for usage inside server.js
 module.exports = {
     create_user,
-    get_lists,
+    get_private_lists,
     sanitize_user_input,
     validate_match,
     validate_id_list,
@@ -422,10 +406,9 @@ module.exports = {
     validate_name,
     create_list,
     save_list,
-    get_list_ids,
     get_list_id,
     delete_list,
-    get_details_from_list,
+    get_details_id_list,
     get_all_info,
     get_info_name,
     get_info_id,
