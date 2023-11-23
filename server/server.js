@@ -149,51 +149,20 @@ app.post("/api/secure/lists/:id", authenticateToken, (req, res) => {
 });
 
 // get public lists
-app.get("/api/open/lists/", (req, res) => {
+app.get("/api/open/lists", (req, res) => {
     const lists = superhero_util.get_recent_public_lists(req.body);
     res.send(lists);
 })
-// Endpoint to GET all matches for a given field, query and number of results
+
+// Endpoint to GET all matches for given filters with n results
 app.get("/api/open/superheros_info/match", (req, res) => {
     match_result = superhero_util.match(req.body.filters, req.body.n);
     // Send match result to client
     res.send(match_result);
 });
 
-// Endpoint to GET superhero info for given id
-app.get("/api/open/superheros_info/:id", (req, res) => {
-    // Get fields from params 
-    const id = Number(req.params.id);
-    // Validate id (sanitize)
-    const { error } = superhero_util.validate_id(id);
-    // Validation raised error, return error message (400 client error)
-    if (error) return res.status(400).send(error.details[0].message);
-    // Get superhero information for given id
-    const superhero_info = superhero_util.get_info(id);
-    // No id matches, return error message (404 error)
-    if (superhero_info instanceof Error) return res.status(404).send(superhero_info.message);
-    // Send superhero information result to client
-    res.send(superhero_info);
-});
-
-// Endpoint to GET all superhero powers for given id
-app.get("/api/open/superheros_powers/:id", (req, res) => {
-    // Get fields from params 
-    const id = Number(req.params.id);
-    // Validate id (sanitize)
-    const { error } = superhero_util.validate_id(id);
-    // Validation raised error, return error message (400 client error)
-    if (error) return res.status(400).send(error.details[0].message);
-    // Get power information for given id
-    const superhero_powers = superhero_util.get_powers(id);
-    // No id matches, return error message (404 error)
-    if (superhero_powers instanceof Error) return res.status(404).send(superhero_powers.message);
-    // Send power information result to client
-    res.send(superhero_powers);
-});
-
-// Endpoint to GET all superhero and power info for a given list of ids
-app.get("/api/open/lists/details", (req, res) => {
+// Endpoint to GET all details (info/powers) for a given list of ids
+app.get("/api/open/superheros_info", (req, res) => {
     let id_list;
     // Parse id_list from query
     try {
@@ -211,6 +180,22 @@ app.get("/api/open/lists/details", (req, res) => {
     // Send details to client
     res.send(list);
 })
+
+// Endpoint to GET superhero details (info/powers) for given id
+app.get("/api/open/superheros_info/:id", (req, res) => {
+    // Get fields from params 
+    const id = Number(req.params.id);
+    // Validate id (sanitize)
+    const { error } = superhero_util.validate_id(id);
+    // Validation raised error, return error message (400 client error)
+    if (error) return res.status(400).send(error.details[0].message);
+    // Get superhero information for given id
+    const superhero_info = superhero_util.get_details_id(id);
+    // No id matches, return error message (404 error)
+    if (superhero_info instanceof Error) return res.status(404).send(superhero_info.message);
+    // Send superhero information result to client
+    res.send(superhero_info);
+});
 
 // Listening to application and displaying port number
 app.listen(port, () => console.log(`Listening on port ${port}...`));
