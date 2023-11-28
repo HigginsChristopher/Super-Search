@@ -10,5 +10,6 @@ export interface Superhero {
     ["Skin color"]: string;
     ["Alignment"]: string;
     ["Weight"]: number;
-    ["powers"]: {}
+    ["powers"]: [];
+    showDetails?: boolean
 }
