@@ -1,17 +1,118 @@
 .list {
-    background: #f4f4f4;
-    margin: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    user-select: none;
+  background: #f4f4f4;
+  margin: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .list.visibility {
-    border-left: 5px solid green;
+  border-left: 5px solid green;
 }
 
 .list h3 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Add styling for the form and search results */
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+app-button {
+  margin-top: 10px;
+}
+
+/* Add styling for search results */
+.search-results {
+  margin-top: 20px;
+}
+
+
+
+.search-results ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.search-results li {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  background-color: #f9f9f9;
+  user-select: none;
+}
+
+.search-results li:hover {
+  background-color: #e0e0e0;
+}
+
+.search-results li li:hover {
+  background-color: white;
+}
+
+.hero-details {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 15px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-details p {
+  margin: 0 0 10px;
+}
+
+.hero-details ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hero-details li {
+  margin-bottom: 5px;
+}
+
+.hero-details .powers-list {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap; /* Allow powers to wrap to the next line */
+}
+
+.hero-details .powers-list li {
+  margin-right: 10px; /* Adjust the spacing between powers */
+}
+
+.powers-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.powers-list li {
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: none;
+  /* Remove the transition effect */
 }
