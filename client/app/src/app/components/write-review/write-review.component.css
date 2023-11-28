@@ -1,0 +1,76 @@
+/* error-popup.component.css */
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    position: relative;
+    width: 400px;
+    /* Adjust the width as needed */
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: red;
+    /* Set the color of the close icon */
+  }
+  
+  
+  .hero-details {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .hero-details p {
+    margin: 0 0 10px;
+  }
+  
+  .hero-details ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .hero-details li {
+    margin-bottom: 5px;
+  }
+  
+  .hero-details .powers-list {
+    margin-top: 10px;
+  }
+  
+  .hero-details .powers-list li {
+    margin-bottom: 5px;
+  }
+
+  /* In your CSS file or style block */
+.rating-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#rating {
+  width: 100%; /* Ensure the input takes up the full width of its container */
+  margin: 0; /* Remove any default margin */
+  padding: 0; /* Remove any default padding */
+}
