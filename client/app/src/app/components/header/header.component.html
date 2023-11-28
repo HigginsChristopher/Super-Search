@@ -1,24 +1,35 @@
 <header>
     <h1>{{title}}</h1>
-    <app-button *ngIf="hasRoute('/lists')" color="{{showAddList ? 'red' : 'green'}}"
+    <app-button *ngIf="hasRoute('/lists') && currentUser" color="{{showAddList ? 'red' : 'green'}}"
         text="{{showAddList? 'Close' : 'Add'}}" (btnClick)="toggleAddList()">
+    </app-button>
+    <app-button *ngIf="hasRoute('/') && (currentUser?.userType==='admin' || currentUser?.userType==='owner')" text="Admin" (btnClick)="routeAdminMenu()">
     </app-button>
 </header>
 <div *ngIf="hasRoute('/')">
-    <div *ngIf="!user">
-        <app-button color="steelblue" text="Login" (btnClick)="routeLogin()">
-        </app-button>
+    <h3>About:</h3>
+    <div class="about-section">
+        <p>Welcome to SuperSearch - your one-stop solution for managing and organizing your favorite heroes!</p>
+        <p>Explore the exciting world of heroes, create personalized lists, and easily search for your favorite
+            characters.</p>
+        <p>Not a member yet? Click "Login" to get started and unleash the power of hero management!</p>
     </div>
-    <div *ngIf="user">
-        <app-button color="steelblue" text="Logout" (btnClick)="routeLogout()">
-        </app-button>
-    </div>
-    <div>
-        <app-button color="steelblue" text="Hero Search" (btnClick)="routeHero()">
-        </app-button>
-    </div>
-    <div>
-        <app-button color="steelblue" text="Manage Lists" (btnClick)="routeLists()">
-        </app-button>
+    <div class="button-container">
+        <div *ngIf="!currentUser">
+            <app-button  text="Login" (btnClick)="routeLogin()">
+            </app-button>
+        </div>
+        <div *ngIf="currentUser">
+            <app-button  text="Logout" (btnClick)="routeLogout()">
+            </app-button>
+        </div>
+        <div>
+            <app-button  text="Hero Search" (btnClick)="routeHero()">
+            </app-button>
+        </div>
+        <div>
+            <app-button  text="Manage Lists" (btnClick)="routeLists()">
+            </app-button>
+        </div>
     </div>
 </div>

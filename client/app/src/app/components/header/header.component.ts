@@ -15,27 +15,25 @@ export class HeaderComponent implements OnInit {
   @Input() title: string = "";
   showAddList: boolean = false;
   subscription: Subscription = new Subscription();
-  userDetails$ = this.userService.user$;
-  user: User | null = null;
+  currentUser: User | null = null;
 
   constructor(private userService: UserService, private uiService: UiService, private router: Router, private titleService: TitleService) {
     this.subscription = this.uiService.onToggle().subscribe(value => this.showAddList = value);
   }
 
   ngOnInit(): void {
-    this.userDetails$.subscribe((user) => {
-      this.user = user;
+    this.userService.getCurrentUser().subscribe(user => {
+      this.currentUser = user;
     });
     this.updateTitle();
   }
-  updateTitle(){
+  updateTitle() {
     this.titleService.currentTitle$.subscribe((title) => {
-      if (this.user) {
-        if(this.hasRoute("/")){
-          this.title = `${title} - Welcome back ${this.user.username}!`;
-          console.log("here 2")
+      if (this.currentUser) {
+        if (this.hasRoute("/")) {
+          this.title = `${title} - Welcome back ${this.currentUser.username}!`;
         }
-        else{
+        else {
           this.title = title;
         }
       }
@@ -69,9 +67,17 @@ export class HeaderComponent implements OnInit {
     const listsUrl = currentUrl.endsWith('/hero-search') ? currentUrl : `${currentUrl}/hero-search`;
     this.router.navigate([listsUrl]);
   }
-  routeLogout(){
-    this.user = null;
-    localStorage.setItem('currentUser', "");
+
+  routeLogout() {
+    this.userService.setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("userData");
     this.updateTitle();
+  }
+
+  routeAdminMenu() {
+    const currentUrl = this.router.url;
+    const listsUrl = currentUrl.endsWith('/admin-menu') ? currentUrl : `${currentUrl}/admin-menu`;
+    this.router.navigate([listsUrl]);
   }
 }
