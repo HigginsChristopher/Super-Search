@@ -1,0 +1,28 @@
+<!-- simple-modal.component.html -->
+<div class="popup-container" (dblclick)="($event.stopPropagation())">
+  <div class="popup-content">
+    <fa-icon class="close-button" (click)="onCloseModal()" [icon]="faTimes"></fa-icon>
+
+    <h2>Edit List</h2>
+
+    <form [formGroup]="editForm" class="add-form" (submit)="onSubmit($event)">
+      <div class="form-control">
+        <label for="list-name">List Name:</label>
+        <input id="list-name" formControlName="list-name" placeholder="Enter list name..." />
+      </div>
+      <div class="form-control"> 
+        <label for="superhero_ids">ID List:</label>
+        <input id="superhero_ids" formControlName="superhero_ids" placeholder="Enter ID list..." />
+      </div>
+      <div class="form-control">
+        <label for="description">Description:</label>
+        <textarea rows="8" maxlength="288" id="description" formControlName="description" placeholder="Enter list description..."></textarea>
+      </div>
+      <div class="form-control form-control-check">
+        <label for="visibility">Public:</label>
+        <input type="checkbox" id="visibility" formControlName="visibility" />
+      </div>
+      <app-button text="Save List"></app-button>
+    </form>
+  </div>
+</div>
