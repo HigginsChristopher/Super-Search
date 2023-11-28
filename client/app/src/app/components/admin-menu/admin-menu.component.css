@@ -1,0 +1,64 @@
+/* admin.component.css */
+
+.user-container {
+  border: 1px solid #ccc;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease-in-out;
+  user-select: none;
+}
+
+.user-container:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flag-button {
+  margin-left: 10px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+
+.reviews-container {
+  margin-top: 10px;
+}
+
+.review {
+  border: 1px solid #ddd;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.review:hover {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-comment {
+  margin-top: 10px;
+}
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-icon {
+  margin-left: auto; /* Push the icon to the right */
+}

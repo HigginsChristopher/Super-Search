@@ -1,0 +1,25 @@
+<!-- admin.component.html -->
+
+<div *ngFor="let user of users" class="user-container">
+    <div class="user-header" (dblclick)="toggleReviews(user)">
+        <span>{{ user.username }}</span>
+
+        <fa-icon (click)="toggleAdminStatus(user)" *ngIf="currentUser?.userType === 'owner'" [icon]="getAdminIcon(user)"
+            class="admin-icon" (click)="$event.stopPropagation()"></fa-icon>
+
+        <fa-icon (click)="flagUser(user)" [ngStyle]="user.disabled ? {'color': 'red'} : {'color': 'green'}"
+            [icon]="faTimes" class="flag-button" (click)="$event.stopPropagation()"
+            (dblclick)="$event.stopPropagation()"></fa-icon>
+    </div>
+    <div *ngIf="user.showReviews && user.reviews!.length>0" class="reviews-container">
+        <div *ngFor="let review of user.reviews" class="review">
+            <div class="review-header">
+                Review ID: {{ review.review_id }}
+                <fa-icon (click)="flagReview(user, review)"
+                    [ngStyle]="review.hidden ? {'color': 'red'} : {'color': 'green'}" [icon]="faTimes"
+                    class="flag-button"></fa-icon>
+            </div>
+            <div class="review-comment">{{ review.comment }}</div>
+        </div>
+    </div>
+</div>
