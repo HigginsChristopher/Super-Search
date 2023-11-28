@@ -1,0 +1,24 @@
+<div class="popup-container">
+  <div class="popup-content">
+    <fa-icon class="close-button" (click)="onCloseButtonClick()" [icon]="faTimes"></fa-icon>
+    <div *ngIf="isArray()" class="hero-details">
+      <h3>Submission Errors:</h3>
+      <ul class="powers-list">
+        <li *ngFor="let error of errorMessage">{{error}}</li>
+      </ul>
+    </div>
+    <div *ngIf="!isArray()">
+      <p class="error-message">{{errorMessage}}</p>
+      <div *ngIf="errorMessage=='Account not verified! Check your email for verification email.'">
+        <p>
+          If you haven't received an email, you can
+          <a (click)="resendVerification()" class="resend-link">resend the verification email</a>.
+        </p>
+        <p *ngIf="currentUser">{{mockEmail}}<a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a></p>
+      </div>
+      <div *ngIf="errorMessage=='Wrong password.'">
+        <p>Forgot password? <a class="resend-link" (click)="onForgot()">Send recovery email</a></p>
+      </div>
+    </div>
+  </div>
+</div>
