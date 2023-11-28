@@ -1,8 +1,15 @@
+import { Review } from "./Review";
+
 export interface User {
-    ["username"]: string;
+    ["user_id"]?: number,
+    userType?: string,
+    ["username"]?: string;
     ["password"]: string;
     ["email"]: string;
     ["verificationToken"]?: string;
     ["jwtToken"]?: string;
-    ["activated"]: boolean;
+    ["verified"]?: boolean;
+    ["reviews"]?: Review[];
+    "disabled"?: boolean;
+    showReviews?: boolean;
 }
