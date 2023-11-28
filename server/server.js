@@ -1,7 +1,6 @@
 // Importing dependencies (express, script.js and validator)
 const express = require("express");
 const superhero_util = require('./script.js');
-const validator = require("validator");
 const jwt = require('jsonwebtoken');
 
 // Setting up port and express application
@@ -35,6 +34,29 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+const checkAdmin = (req, res, next) => {
+    // Assuming you have the authenticated user in req.user
+    if (req.user && (req.user.userType === "admin" || req.user.userType === "owner")) {
+        // User is an admin
+        return next();
+    } else {
+        // User is not an admin
+        return res.status(403).json({ message: 'Forbidden - Admins only' });
+    }
+};
+
+
+const checkOwner = (req, res, next) => {
+    // Assuming you have the authenticated user in req.user
+    if (req.user && (req.user.userType === "owner")) {
+        // User is an admin
+        return next();
+    } else {
+        // User is not an admin
+        return res.status(403).json({ message: 'Forbidden - Owner only' });
+    }
+};
+
 // MIDDLEWARE
 // // Add this middleware to enable CORS
 // app.use((req, res, next) => {
@@ -62,38 +84,109 @@ app.use((req, res, next) => {
 
 
 // ENDPOINTS
+
+app.post('/api/owner/users/admin/:id', authenticateToken, checkOwner, async (req, res) => {
+    const users = superhero_util.admin_user(req.params.id);
+    res.send(users);
+});
+
+app.get('/api/admin/users/', authenticateToken, checkAdmin, async (req, res) => {
+    const users = superhero_util.get_all_user_info(req.user.userType);
+    res.send(users);
+});
+
+app.post('/api/admin/users/disable/:id', authenticateToken, checkAdmin, async (req, res) => {
+    const user = superhero_util.disable_user(req.params.id);
+    res.send(user);
+});
+
+app.post('/api/admin/reviews/flag/:id', authenticateToken, checkAdmin, async (req, res) => {
+    const review = superhero_util.flag_review(req.params.id);
+    res.send(review);
+});
+
+app.get('/api/open/reviews/:id', (req, res) => {
+    const reviews = superhero_util.get_reviews_list_id(req.params.id)
+    if (reviews instanceof Error) {
+        res.send({ message: reviews.message });
+    }
+    else {
+        res.send(reviews);
+    }
+});
+
+app.post('/api/secure/lists/reviews/', authenticateToken, (req, res) => {
+    req.body.user_id = req.user.user_id;
+    const review = superhero_util.review_list(req.body);
+    if (review instanceof Error) {
+        res.send({ message: review.message });
+    }
+    else {
+        res.send(review);
+    }
+});
 // Login endpoint
-app.post('/api/open/login', async (req, res) => {
-    const user = await superhero_util.get_user(req.body);
+app.post('/api/open/users/login', async (req, res) => {
+    const user = await superhero_util.login_user(req.body);
+
     if (!(user instanceof Error)) {
         // Generate JWT token
-        const token = jwt.sign({ user_id: user.id, email: user.email, username: user.username }, secretKey, { expiresIn: '1h' });
-        res.json({ token });
+        const token = jwt.sign({ user_id: user.id, email: user.email, username: user.username, userType: user.userType }, secretKey, { expiresIn: '1h' });
+        res.json({ token: token });
     } else {
         res.status(401).json({ message: user.message });
     }
 });
 
 // Registration endpoint
-app.post('/api/open/register', async (req, res) => {
+app.post('/api/open/users/register', async (req, res) => {
     const user = await superhero_util.create_user(req.body);
     if (!(user instanceof Error)) {
-        res.json({ verificationToken: user.verificationToken });
+        const return_user = {
+            email: user.email,
+            verificationToken: user.verificationToken
+        }
+        res.json({ user: return_user });
     } else {
         res.status(401).json({ message: user.message });
     }
 });
 
+
+
 // Verification endpoint
-app.get('/api/open/verify', (req, res) => {
-    const user = superhero_util.verify_user(req.query.token);
+app.get('/api/open/users/verify', async (req, res) => {
+    const user = await superhero_util.verify_user(req.query.token);
     if (!(user instanceof Error)) {
-        // Return a response indicating successful verification
-        res.json({ message: 'Email verified successfully' });
+        const token = jwt.sign({ user_id: user.id, email: user.email, username: user.username, userType: user.userType }, secretKey, { expiresIn: '1h' });
+        res.json({ token: token });
     } else {
         // Return a response indicating unsuccessful verification
         res.status(400).json({ message: user.message });
     }
+});
+
+// Verification endpoint
+app.post('/api/open/users/verify/resend/', async (req, res) => {
+    const user = superhero_util.resend_verification(req.body.email);
+    if (user !== undefined) {
+        const return_user = {
+            email: user.email,
+            verificationToken: user.verificationToken
+        }
+        res.json({ user: return_user });
+    } else {
+        // Return a response indicating unsuccessful verification
+        res.status(400).json({ message: "Email to verify does not exist!" });
+    }
+});
+
+// Endpoint to GET username for given user id
+app.get("/api/open/users/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const user = superhero_util.get_user(id).value();
+    if (user instanceof Error) return res.status(404).send(user.message);
+    res.send({ username: user.username });
 });
 
 // Route to handle /api/secure/lists
@@ -118,35 +211,36 @@ app.route("/api/secure/lists/")
         if (list instanceof Error) return res.status(404).send(list.message);
         res.send(list);
     })
+
+
+app.route("/api/secure/lists/:id")
+    .post(authenticateToken, (req, res) => {
+        const list_object = {
+            user_id: req.user.user_id,
+            list_id: parseInt(req.params.id),
+            "list-name": req.body["list-name"],
+            superhero_ids: req.body.superhero_ids,
+            description: req.body.description,
+            visibility: req.body.visibility
+        }
+        // Validate update list details (sanitize)
+        const { error } = superhero_util.validate_update_list(list_object);
+        // Validation raised error, return error message (400 client error)
+        if (error) return res.status(400).send(error.details[0].message);
+        // Save list with given id and id list
+        const list = superhero_util.save_list(list_object)
+        // List with given ID doesn't exist, return error message (404 error)
+        if (list instanceof Error) return res.status(404).send(list.message);
+        res.send(list);
+    })
     // delete private list
     .delete(authenticateToken, (req, res) => {
-        const { error } = superhero_util.validate_name(req.body["list-name"]);
+        const { error } = superhero_util.validate_id(req.params.id);
         if (error) return res.status(400).send(error.details[0].message);
-        const list = superhero_util.delete_list(req.user.user_id, req.body["list-name"]);
+        const list = superhero_util.delete_list(req.user.user_id, parseInt(req.params.id));
         if (list instanceof Error) return res.status(404).send(list.message);
         res.status(204).end();
     });
-
-// update private list
-app.post("/api/secure/lists/:id", authenticateToken, (req, res) => {
-    const list_object = {
-        user_id: req.user.user_id,
-        list_id: parseInt(req.params.id),
-        "list-name": req.body["list-name"],
-        superhero_ids: req.body.superhero_ids,
-        description: req.body.description,
-        visibility: req.body.visibility
-    }
-    // Validate update list details (sanitize)
-    const { error } = superhero_util.validate_update_list(list_object);
-    // Validation raised error, return error message (400 client error)
-    if (error) return res.status(400).send(error.details[0].message);
-    // Save list with given id and id list
-    const list = superhero_util.save_list(list_object)
-    // List with given ID doesn't exist, return error message (404 error)
-    if (list instanceof Error) return res.status(404).send(list.message);
-    res.send(list);
-});
 
 // get public lists
 app.get("/api/open/lists", (req, res) => {
@@ -155,8 +249,8 @@ app.get("/api/open/lists", (req, res) => {
 })
 
 // Endpoint to GET all matches for given filters with n results
-app.get("/api/open/superheros_info/match", (req, res) => {
-    match_result = superhero_util.match(req.body.filters, req.body.n);
+app.post("/api/open/superheros_info/match", (req, res) => {
+    match_result = superhero_util.match(req.body.filters);
     // Send match result to client
     res.send(match_result);
 });
