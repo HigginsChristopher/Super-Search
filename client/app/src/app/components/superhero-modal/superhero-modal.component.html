@@ -1,0 +1,26 @@
+<div class="popup-container" (dblclick)="($event.stopPropagation())">
+  <div class="popup-content">
+    <fa-icon class="close-button" (click)="onCloseModal()" [icon]="faTimes"></fa-icon>
+    <strong>{{ superhero.name }}</strong> - {{ superhero.Publisher }}
+    <div class="hero-details">
+      <p><strong>Additional Information:</strong></p>
+      <ul class="powers-list">
+        <li>ID: {{ superhero.id }}</li>
+        <li>Gender: {{ superhero.Gender }}</li>
+        <li>Eye color: {{ superhero["Eye color"] }}</li>
+        <li>Race: {{ superhero.Race }}</li>
+        <li>Hair color: {{ superhero["Hair color"] }}</li>
+        <li>Height: {{ superhero.Height }}</li>
+        <li>Skin color: {{ superhero["Skin color"] }}</li>
+        <li>Alignment: {{ superhero["Alignment"] }}</li>
+        <li>Weight: {{ superhero["Weight"] }}</li>
+      </ul>
+      <br>
+      <p><strong>Powers:</strong></p>
+      <ul class="powers-list">
+        <li *ngFor="let power of superhero.powers">
+          {{ power }}
+        </li>
+      </ul>
+    </div>
+  </div>
