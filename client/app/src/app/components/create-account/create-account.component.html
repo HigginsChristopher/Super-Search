@@ -1,39 +1,40 @@
 <!-- create-account.component.html -->
 <div class="form-control" *ngIf="createAccountForm">
-  <form [formGroup]="createAccountForm">
-      <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" formControlName="email">
-          <div *ngIf="createAccountForm.get('email')?.hasError('required') && createAccountForm.get('email')?.touched">
-              Email is required.
-          </div>
-          <div *ngIf="createAccountForm.get('email')?.hasError('email') && createAccountForm.get('email')?.touched">
-              Invalid email format.
-          </div>
-      </div>
-      <div class="form-group">
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" formControlName="password">
-          <div *ngIf="createAccountForm.get('password')?.hasError('required') && createAccountForm.get('password')?.touched">
-              Password is required.
-          </div>
-      </div>
-      <div class="form-group">
-          <label for="nickname">Nickname:</label>
-          <input type="text" id="nickname" name="nickname" formControlName="nickname">
-          <div *ngIf="createAccountForm.get('nickname')?.hasError('required') && createAccountForm.get('nickname')?.touched">
-              Nickname is required.
-          </div>
-      </div>
-      <app-button color="steelblue" text="Create Account" (btnClick)="onSubmit()">Create Account</app-button>
-  </form>
-  <div *ngIf="registrationSuccess" class="smallText">
-    <br>
-    <p>Registration successful! Please check your email to verify your account.</p>
-    <p>
-      If you haven't received an email, you can
-      <a (click)="resendVerification()" class="resend-link">resend the verification email</a>.
-    </p>
-    <pre *ngIf="createdUser">{{mockEmail}}</pre>
-  </div>
+    <app-error-popup *ngIf="showErrorPopup" [errorMessage]="errorMessages"
+        (closePopup)="onClosePopup()"></app-error-popup>
+    <form [formGroup]="createAccountForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" formControlName="email" placeholder="Enter email">
+            <div
+                *ngIf="createAccountForm.get('email')?.hasError('required') && createAccountForm.get('email')?.touched">
+                Email is required.
+            </div>
+            <div *ngIf="createAccountForm.get('email')?.hasError('email') && createAccountForm.get('email')?.touched">
+                Invalid email format.
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" formControlName="password" placeholder="Enter password">
+            <div
+                *ngIf="createAccountForm.get('password')?.hasError('required') && createAccountForm.get('password')?.touched">
+                Password is required.
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="nickname">Nickname:</label>
+            <input type="text" id="nickname" name="nickname" formControlName="nickname" placeholder="Enter nickname">
+            <div
+                *ngIf="createAccountForm.get('nickname')?.hasError('required') && createAccountForm.get('nickname')?.touched">
+                Nickname is required.
+            </div>
+        </div>
+        <app-button  text="Create Account" (btnClick)="onSubmit()">Create Account</app-button>
+    </form>
+    <div *ngIf="registrationSuccess" class="smallText">
+        <br>
+        <p>Registration successful! Please check your email to verify your account.</p>
+        <pre *ngIf="createdUser">{{mockEmail}}<a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a></pre>
+    </div>
 </div>
