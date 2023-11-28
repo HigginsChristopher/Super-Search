@@ -1,7 +1,26 @@
-<app-add-list (onAddList)="addList($event)"></app-add-list>
-<app-list-item 
-    *ngFor="let list of lists" 
-    [list]="list" 
+<app-add-list 
+(onAddList)="addList($event)"></app-add-list>
+<app-error-popup *ngIf="showErrorPopup" [errorMessage]="errorMessages"
+(closePopup)="onClosePopup()"></app-error-popup>
+<div *ngIf="currentUser">
+    <h2>Your Lists</h2>
+    <app-list-item
+    *ngFor="let list of privateLists" 
+    [list]="list"
+    [listType]="'private'"
     (onDeleteList)="deleteList(list)"
-    (onToggleList)="toggleList(list)" 
+    (onToggleList)="toggleList(list)"
+    (onUpdateList)="updateList($event)" 
     ></app-list-item>
+</div>
+<br>
+<div>
+    <h2>Public Lists</h2>
+    <app-list-item
+    *ngFor="let list of publicLists" 
+    [list]="list"
+    [listType]="'public'"
+    (onCreateReview)="createReview($event)" 
+    ></app-list-item>
+</div>
+
