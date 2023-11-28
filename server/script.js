@@ -3,9 +3,10 @@ const low = require("lowdb");
 const Joi = require("joi");
 const FileSync = require("lowdb/adapters/FileSync");
 const sanitize_html = require("sanitize-html");
-const crypto = require("crypto");
 const Fuse = require('fuse.js');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const secretKey = "0b5a662e273a925daf4054db7262d4494ebf50b3ad09ca8df8e984103ee6be4a972c4c1ee7dd5cfb020d0d86cdb753f4d58086d9787c7b10ff7fb57daf50455e";
 
 // Superhero info database and syncing it with an adapter
 const info_adapter = new FileSync("../data/superhero_info.json");
@@ -34,9 +35,15 @@ user_db.defaults({ users: [] }).write();
 const id_adapter = new FileSync("../data/ids.json");
 const id_db = low(id_adapter)
 id_db.read();
-
 // Default if ids.json doesn't exists
-id_db.defaults({ "highestUserId": -1, "highestListId": -1 }).write();
+id_db.defaults({ "highestUserId": -1, "highestListId": -1, "highestReviewId": -1 }).write();
+
+// ID database for lists and syncing it with an adapter
+const review_adapter = new FileSync("../data/reviews.json");
+const review_db = low(review_adapter)
+review_db.read();
+review_db.defaults({ reviews: [] }).write();
+
 
 // Method to sanitize objects contents, remove HTML, JS and CSS elements #EXTRA LAYER
 const sanitize_user_input = (obj) => {
@@ -66,6 +73,31 @@ const hashPassword = async (password) => {
     }
 };
 
+const generateVerificationToken = () => {
+    return token = jwt.sign({}, secretKey, { expiresIn: '24h' });;
+}
+
+const verifyVerificationToken = (token) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secretKey, (err, decoded) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(decoded);
+            }
+        });
+    });
+};
+
+const verifyToken = async (token) => {
+    try {
+        const decoded = await verifyVerificationToken(token);
+        return decoded;
+    } catch (error) {
+        return error;
+    }
+};
+
 // Compare the user-provided password with the stored hashed password
 const comparePasswords = async (userProvidedPassword, storedHashedPassword) => {
     try {
@@ -76,14 +108,76 @@ const comparePasswords = async (userProvidedPassword, storedHashedPassword) => {
     }
 };
 
-const get_user = async (user) => {
-    const info = user_db.get("users").find({ "email": user.email }).value();
-    if (info === undefined) return new Error(`No users for given email.`)
-    const approve = await comparePasswords(user.password, info.password)
+const review_list = (review) => {
+    let currentUser = list_db.get("lists").find({ "user_id": review.user_id, "list_id": review.list_id }).value();
+    if (currentUser) {
+        return new Error("Users can not review their own list.")
+    }
+    currentUser = review_db.get("reviews").find({ "user_id": review.user_id, "list_id": review.list_id }).value();
+    if (currentUser) {
+        return new Error("Users can only leave one review per list.")
+    }
+    const currentHighestId = id_db.get('highestReviewId').value();
+    const newHighestId = currentHighestId + 1;
+    id_db.set('highestReviewId', newHighestId)
+        .write();
+    const newReview = { "review_id": newHighestId, "list_id": review.list_id, "user_id": review.user_id, "rating": review.rating, "comment": review.comment, "hidden": false };
+    review_db.get("reviews").push(newReview).write();
+    return newReview;
+}
+
+const get_reviews_list_id = (list_id) => {
+    const reviews = review_db.get("reviews")
+        .filter(review => {
+            return review.list_id == list_id
+        }).value();
+    if (reviews.length == 0) return new Error(`No reviews for given list id.`)
+    return reviews;
+}
+
+const get_reviews_user_id = (user_id) => {
+    let reviews = review_db.get("reviews").value()
+    reviews = reviews.filter(review => {
+        return review.user_id == user_id
+    });
+    return reviews;
+}
+
+const get_all_user_info = (userType) => {
+    let users = structuredClone(user_db.get("users").value());
+    users = users.filter(user => user.userType !== 'owner');
+    if (userType === "admin") {
+        users = users.filter(user => user.userType !== 'admin');
+    }
+    for (const user of users) {
+        delete user.password;
+        const reviews = get_reviews_user_id(user.id);
+        user.reviews = reviews;
+    }
+    return users;
+}
+
+const get_user = (user_id) => {
+    const user = user_db.get("users").find({ "id": user_id });
+    if (user.value() === undefined) return new Error(`No users for given id.`);
+    return user;
+};
+
+const get_review = (review_id) => {
+    const review = review_db.get("reviews").find({ "review_id": review_id });
+    if (review.value() === undefined) return new Error(`No reviews for given id.`);
+    return review;
+}
+
+const login_user = async (user) => {
+    const email = user_db.get("users").find({ "email": user.email }).value();
+    if (email === undefined) return new Error(`No users for given email.`)
+    const approve = await comparePasswords(user.password, email.password)
     // Return error if no result for given id
     if (!approve) return new Error(`Wrong password.`)
-    if (!info.activated) return new Error(`Account not verified! Check your email for verification email.`)
-    return info;
+    if (!email.verified) return new Error(`Account not verified! Check your email for verification email.`)
+    if (email.disabled) return new Error(`Account disabled! Contact a site adminstrator.`)
+    return email;
 }
 
 const create_user = async (user) => {
@@ -92,23 +186,55 @@ const create_user = async (user) => {
     const email = user_db.get("users").find({ "email": user.email }).value();
     if (email !== undefined) return new Error(`Email already taken`);
     const hash = await hashPassword(user.password);
-    const verificationToken = crypto.randomBytes(20).toString('hex');
+    const verificationToken = generateVerificationToken();
     // Get new highest id and update id database
     const currentHighestId = id_db.get('highestUserId').value();
     const newHighestId = currentHighestId + 1;
     id_db.set('highestUserId', newHighestId)
         .write();
-    const newUser = { "id": newHighestId, "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, activated: false };
+    const newUser = { "id": newHighestId, "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, verified: false, userType: "user", disabled: false };
     user_db.get("users").push(newUser).write();
     return newUser;
 }
 
-const verify_user = token => {
+const admin_user = user_id => {
+    const user = get_user(user_id);
+    user.assign({ 'userType': "admin" }).write();
+    return user.value();
+}
+
+const disable_user = user_id => {
+    const user = get_user(user_id);
+    user.assign({ 'disabled': !user_disabled }).write();
+    return user.value();
+}
+
+const flag_review = review_id => {
+    const review = get_review(review_id);
+    review.assign({ 'hidden': !review.hidden }).write();
+    return review.value();
+}
+
+const verify_user = async token => {
     const userToUpdate = user_db.get('users').find({ 'verificationToken': token });
     if (!userToUpdate.value()) return new Error(`Verification Token not found`);
-    userToUpdate.assign({ 'activated': true }).write();
-    const updatedUser = userToUpdate.value();
-    return updatedUser;
+    let result;
+    try {
+        result = await verifyToken(token);
+    } catch (error) {
+        result = error
+    }
+    if (!(result instanceof jwt.TokenExpiredError)) {
+        userToUpdate.assign({ 'verified': true }).write();
+        const updatedUser = userToUpdate.value();
+        userToUpdate.assign({ 'verificationToken': "" }).write();
+        return updatedUser;
+    } else {
+        return new Error("Email verfication token expired!");
+    }
+}
+const resend_verification = email => {
+    return user_db.get('users').find({ 'email': email }).value();
 }
 
 // Method to get superhero info for a specified id
@@ -147,12 +273,14 @@ const get_publishers = () => {
 }
 
 // Method to get n results for a given field and match
-const match = (filters, limit = 734) => {
+const match = (filters) => {
     // Remove properties with empty values
     const nonEmptyFilters = Object.fromEntries(
         Object.entries(filters).filter(([key, value]) => value !== '')
     );
     const heroes = get_all_info();
+    const limit = nonEmptyFilters.n ? nonEmptyFilters.n : 734;
+    delete nonEmptyFilters.n;
 
     const options = {
         keys: ['name', "Race", ['powers'], 'Publisher'],
@@ -189,7 +317,7 @@ const get_list_name = (name, user_id) => {
 
 // Method to get list for a given id
 const get_list_id = (list_id, user_id) => {
-    const list = list_db.get("lists").find(list => list.list_id === list_id && list.user_id === user_id);
+    const list = list_db.get("lists").find(list => list.user_id === user_id && list.list_id === list_id);
     // Return error if no result for given id
     if (list.value() === undefined) return new Error(`No list result for user with given list id: ${list_id}`);
     return list;
@@ -217,7 +345,7 @@ const create_list = (list_object) => {
             .write();
         const timestamp = Date.now();
         // Create list and write to database
-        const newList = { "user_id": list_object.user_id, "list_id": newHighestId, "list-name": list_object["list-name"], "superhero_ids": list_object.id_list, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp };
+        const newList = { "user_id": list_object.user_id, "list_id": newHighestId, "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp };
         list_db.get("lists").push(newList).write();
         return newList;
     }
@@ -234,7 +362,7 @@ const save_list = (list_object) => {
     // List exists, save list
     if (!(list instanceof Error)) {
         const timestamp = Date.now();
-        list.assign({ "user_id": list_object.user_id, "list_object": list_object.list_id, "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp }).write();
+        list.assign({ "user_id": list_object.user_id, "list_id": list_object.list_id, "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp }).write();
     }
     // List with given ID doesn't exist, return error
     else {
@@ -243,9 +371,9 @@ const save_list = (list_object) => {
 };
 
 // Method to delete list for a given id
-const delete_list = (user_id, name) => {
+const delete_list = (user_id, list_id) => {
     // Check if list already exists
-    const list = get_list_name(name, user_id);
+    const list = get_list_id(list_id, user_id);
     // List exists, remove list
     if (!(list instanceof Error)) {
         list_db.get("lists").remove(list.value()).write();
@@ -313,7 +441,7 @@ const validate_update_list = (list) => {
         user_id: Joi.number().integer().max(733).min(0).required(),
         list_id: Joi.number().integer().max(733).min(0).required(),
         ["list-name"]: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).unique().strict().required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).min(1).unique().strict().required(),
         description: Joi.string().allow('').max(1000).min(0).strict().required(),
         visibility: Joi.boolean().required()
     }
@@ -325,7 +453,7 @@ const validate_create_list = (list) => {
     const schema = {
         user_id: Joi.number().integer().max(733).min(0).required(),
         ["list-name"]: Joi.string().max(100).min(1).required(),
-        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).unique().strict().required(),
+        superhero_ids: Joi.array().items(Joi.number().integer().min(0).max(734)).min(1).unique().strict().required(),
         description: Joi.string().allow('').max(1000).min(0).strict().required(),
         visibility: Joi.boolean().required()
     }
@@ -360,7 +488,7 @@ const validate_id_list = (id_list) => {
         id_list: id_list
     }
     const schema = {
-        id_list: Joi.array().items(Joi.number().integer()).max(734).min(0).unique().required()
+        id_list: Joi.array().items(Joi.number().integer().max(734).min(0)).min(1).unique().required()
     }
     return Joi.validate(superhero_object, schema);
 };
@@ -383,6 +511,7 @@ const validate_match = (field, match, n) => {
 // Exporting methods for usage inside server.js
 module.exports = {
     create_user,
+    resend_verification,
     get_private_lists,
     sanitize_user_input,
     validate_match,
@@ -403,8 +532,15 @@ module.exports = {
     get_publishers,
     match,
     hashPassword,
-    get_user,
+    login_user,
     create_user,
     verify_user,
-    get_recent_public_lists
+    get_recent_public_lists,
+    get_reviews_list_id,
+    review_list,
+    get_user,
+    get_all_user_info,
+    disable_user,
+    flag_review,
+    admin_user
 };
