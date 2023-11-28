@@ -1,6 +1,6 @@
 <div class="container">
     <app-header ></app-header>
     <router-outlet></router-outlet>
-    <app-button *ngIf="!hasRoute('/')" color="steelblue" text="Home" (btnClick)="routeHome()"></app-button>
+    <app-button *ngIf="!hasRoute('/')" text="Home" (btnClick)="routeHome()"></app-button>
     <app-footer *ngIf="!hasRoute('/about')"></app-footer>
 </div>
