@@ -5,53 +5,46 @@ import { List } from "../List";
 import { Superhero } from '../superhero';
 import { User } from '../user';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    "Content-Type": "application/json"
-  })
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class ListService {
-  private apiUrl = "http://localhost:3000/api/"
+  private jwtToken: string | null | undefined = null;
+  private headers: HttpHeaders;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    let token = localStorage.getItem('token');
+    token = token ? JSON.parse(token) : null;
+    this.jwtToken = token
 
-  getLists(): Observable<List[]> {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}').currentUser;
-    const jwtToken = currentUser ? currentUser.jwtToken : null;
-
-    const headers = new HttpHeaders().set('Authorization', `${jwtToken}`);
-
-    return this.http.get<List[]>(`${this.apiUrl}secure/lists`, { headers })
+    // Initialize headers with the authorization token
+    this.headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${this.jwtToken}`)
+      .set('Content-Type', 'application/json');
   }
 
-  deleteList(list: List): Observable<List> {
-    // Get your JWT token from wherever it's stored (e.g., localStorage)
-    const jwtToken = localStorage.getItem('jwtToken');
+  getPrivateLists(): Observable<List[]> {
+    const url = `/api/secure/lists/`;
+    return this.http.get<List[]>(url, { headers: this.headers })
+  }
 
-    // Set up the headers with the authorization token
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${jwtToken}`);
+  getPublicLists(): Observable<List[]> {
+    const url = `/api/open/lists/`;
+    return this.http.get<List[]>(url, { headers: this.headers })
+  }
 
-    const url = `${this.apiUrl}/${list.id}`;
-    // Make the request with the headers
-    return this.http.delete<List>(url, { headers });
+  deletePrivateList(list: List): Observable<List> {
+    const url = `/api/secure/lists/${list.list_id}`;
+    return this.http.delete<List>(url, { headers: this.headers })
   }
 
   updateList(list: List): Observable<List> {
-    const url = `${this.apiUrl}/${list.id}`;
-    return this.http.post<List>(url, list, httpOptions);
+    const url = `/api/secure/lists/${list.list_id}`;
+    return this.http.post<List>(url, list, { headers: this.headers });
   }
 
   addList(list: List): Observable<List> {
-    const url = `${this.apiUrl}`;
-    return this.http.post<List>(url, list, httpOptions);
-  }
-
-  displayDetails(list: List): Observable<Superhero[]> {
-    const url = `${this.apiUrl}/details?id_list=[${list.superhero_ids}]`;
-    return this.http.get<Superhero[]>(url);
+    const url = `/api/secure/lists/`;
+    return this.http.post<List>(url, list, { headers: this.headers });
   }
 }
