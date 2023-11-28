@@ -1,0 +1,122 @@
+/* Add styling for the form and search results */
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+app-button {
+  margin-top: 10px;
+}
+
+/* Add styling for search results */
+.search-results {
+  margin-top: 20px;
+}
+
+.search-results h3 {
+  font-size: 18px;
+  color: steelblue;
+  margin-bottom: 10px;
+}
+
+.search-results ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.search-results li {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  background-color: #f9f9f9;
+  user-select: none;
+}
+
+.search-results li:hover {
+  background-color: #e0e0e0;
+}
+
+.hero-details {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 15px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-details p {
+  margin: 0 0 10px;
+}
+
+.hero-details ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hero-details li {
+  margin-bottom: 5px;
+}
+
+.hero-details .powers-list {
+  margin-top: 10px;
+}
+
+.hero-details .powers-list li {
+  margin-bottom: 5px;
+}
+
+.powers-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.powers-list li {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.powers-list li:hover {
+  background-color: #e0e0e0;
+}
+
+/* Styling for the details link */
+.details-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  /* Adjust as needed */
+  margin-top: 15px;
+  color: steelblue;
+  text-decoration: none;
+}
+
+.details-link:hover {
+  text-decoration: underline;
+}

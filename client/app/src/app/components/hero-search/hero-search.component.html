@@ -1,32 +1,67 @@
 <!-- hero-search.component.html -->
 <div class="form-control">
-    <form (ngSubmit)="onSearch()">
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" [(ngModel)]="searchCriteria.name">
-      </div>
-      <div class="form-group">
-        <label for="race">Race:</label>
-        <input type="text" id="race" name="race" [(ngModel)]="searchCriteria.race">
-      </div>
-      <div class="form-group">
-        <label for="power">Power:</label>
-        <input type="text" id="power" name="power" [(ngModel)]="searchCriteria.power">
-      </div>
-      <div class="form-group">
-        <label for="publisher">Publisher:</label>
-        <input type="text" id="publisher" name="publisher" [(ngModel)]="searchCriteria.publisher">
-      </div>
-      <app-button color="steelblue" text="Search" (btnClick)="onSearch()" type="submit"></app-button>
-    </form>
-  
-    <!-- Display search results -->
-    <div *ngIf="searchResults.length > 0" class="search-results">
-      <h3>Search Results</h3>
-      <ul>
-        <li *ngFor="let hero of searchResults">
-          <strong>{{ hero.name }}</strong> - {{ hero.publisher }}
-        </li>
-      </ul>
+  <app-error-popup *ngIf="showErrorPopup" [errorMessage]="errorMessages"
+  (closePopup)="onClosePopup()"></app-error-popup>
+  <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+    <div class="form-group">
+      <label for="name">Hero Name:</label>
+      <input type="text" id="name" name="name" formControlName="name" placeholder="Enter hero name">
     </div>
+    <div class="form-group">
+      <label for="Race">Race:</label>
+      <input type="text" id="Race" name="Race" formControlName="Race" placeholder="Enter hero race">
+    </div>
+    <div class="form-group">
+      <label for="powers">Superpowers:</label>
+      <input type="text" id="powers" name="powers" formControlName="powers" placeholder="Enter hero powers">
+    </div>
+    <div class="form-group">
+      <label for="Publisher">Publisher:</label>
+      <input type="text" id="Publisher" name="Publisher" formControlName="Publisher" placeholder="Enter hero publisher">
+    </div>
+    <div class="form-group">
+      <label for="n">Number of Results:</label>
+      <input type="number" id="n" name="n" formControlName="n" placeholder="Enter number of results">
+    </div>
+    <app-button  text="Search" type="submit"></app-button>
+  </form>
+
+  <!-- Display search results -->
+  <div *ngIf="searchResults.length > 0" class="search-results">
+    <h3>Search Results</h3>
+    <ul>
+      <li *ngFor="let hero of searchResults" (click)="toggleHeroDetails(hero)">
+        <strong>{{ hero.name }}</strong> - {{ hero.Publisher }}
+        <div *ngIf="hero.showDetails" class="hero-details">
+          <p><strong>Additional Information:</strong></p>
+          <ul class="powers-list">
+            <li>ID: {{ hero.id }}</li>
+            <li>Gender: {{ hero.Gender }}</li>
+            <li>Eye color: {{ hero["Eye color"] }}</li>
+            <li>Race: {{ hero.Race }}</li>
+            <li>Hair color: {{ hero["Hair color"] }}</li>
+            <li>Height: {{ hero.Height }}</li>
+            <li>Skin color: {{ hero["Skin color"] }}</li>
+            <li>Alignment: {{ hero["Alignment"] }}</li>
+            <li>Weight: {{ hero["Weight"] }}</li>
+          </ul>
+          <br>
+          <p><strong>Powers:</strong></p>
+          <ul class="powers-list">
+            <li *ngFor="let power of hero.powers">
+              {{ power }}
+            </li>
+          </ul>
+          <a class="details-link search-link"
+            href="{{ 'https://duckduckgo.com/?q=' + hero.name + ' ' + hero.Publisher + '&ia=web' }}" target="_blank"
+            (click)="$event.stopPropagation()">
+            Search on DDG
+          </a>
+        </div>
+      </li>
+    </ul>
   </div>
+  <div *ngIf="searchResults.length == 0 && searched" class="search-results">
+    <h3>No Results</h3>
+  </div>
+</div>

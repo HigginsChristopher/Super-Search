@@ -1,53 +1,79 @@
 // hero-search.component.ts
-import { Component } from '@angular/core';
-
-interface Hero {
-  name: string;
-  race: string;
-  power: string;
-  publisher: string;
-}
-
+import { Component, OnInit } from '@angular/core';
+import { TitleService } from '../../services/title.service';
+import { HeroService } from '../../services/hero.service';
+import { Superhero } from '../../superhero';
+import { HttpErrorResponse } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 @Component({
   selector: 'app-hero-search',
   templateUrl: './hero-search.component.html',
   styleUrls: ['./hero-search.component.css']
 })
-export class HeroSearchComponent {
-  searchCriteria: { name: string, race: string, power: string, publisher: string } = {
-    name: '',
-    race: '',
-    power: '',
-    publisher: ''
-  };
+export class HeroSearchComponent implements OnInit {
+  searchForm: FormGroup;
+  searchResults: Superhero[] = [];
+  searched: boolean = false;
+  showErrorPopup: boolean = false;
+  errorMessages: string = '';
 
-  heroes: Hero[] = [
-    { name: 'Superman', race: 'Kryptonian', power: 'Flight, Super Strength', publisher: 'DC Comics' },
-    { name: 'Spider-Man', race: 'Human', power: 'Agility, Wall-Crawling', publisher: 'Marvel Comics' },
-    // Add more heroes as needed
-  ];
-
-  searchResults: Hero[] = [];
+  ngOnInit(): void {
+    this.titleService.setTitle("Hero Search");
+  }
+  constructor(private formBuilder: FormBuilder, private titleService: TitleService, private heroService: HeroService) {
+    this.searchForm = this.formBuilder.group({
+      name: [''],
+      Race: [''],
+      powers: [''],
+      Publisher: [''],
+      n: ['']
+    }, { validator: this.atLeastOneFieldRequired(['name', 'Race', 'powers', 'Publisher']) });
+  }
 
   onSearch() {
-    this.searchResults = this.heroes.filter(hero =>
-      this.matchesCriteria(hero, this.searchCriteria)
+    if (this.searchForm.valid) {
+    const filters = this.searchForm.value;
+    this.searched = true;
+    this.heroService.matchSearch(filters).subscribe(
+      (heroes) => {
+        this.searchResults = heroes
+      },
+      (error: any) => {
+        if (error instanceof HttpErrorResponse) {
+          // Check for specific HTTP error status codes and handle them
+          this.showPopupWithError(error.error.message);
+        } else {
+          // Handle non-HTTP errors or display a generic error message
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      }
     );
+  } else{
+    this.showErrorPopup = true;
+    this.showPopupWithError("Atleast one field (Hero Name, Race, Superpowers or Publisher) must be filled!");
+  }
+  }
+  // Call this function when you want to show the error popup
+  showPopupWithError(message: any) {
+    this.errorMessages = message;
+    this.showErrorPopup = true;
   }
 
-  private matchesCriteria(hero: Hero, criteria: { name: string, race: string, power: string, publisher: string }): boolean {
-    return (
-      this.startsWith(hero.name, criteria.name) &&
-      this.startsWith(hero.race, criteria.race) &&
-      this.startsWith(hero.power, criteria.power) &&
-      this.startsWith(hero.publisher, criteria.publisher)
-    );
+  onClosePopup() {
+    this.showErrorPopup = false;
   }
 
-  private startsWith(value: string, searchString: string): boolean {
-    const sanitizedValue = value.toLowerCase().replace(/\s+/g, ''); // Remove whitespace and convert to lowercase
-    const sanitizedSearchString = searchString.toLowerCase().replace(/\s+/g, ''); // Remove whitespace and convert to lowercase
-  
-    return sanitizedValue.startsWith(sanitizedSearchString);
+  // Method to toggle hero details
+  toggleHeroDetails(hero: Superhero) {
+    hero.showDetails = !hero.showDetails;
   }
+
+  atLeastOneFieldRequired(fields: string[]): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      const values = fields.map(field => control.get(field)?.value);
+      const isAtLeastOneFieldFilled = values.some(value => value !== null && value !== '');
+      return isAtLeastOneFieldFilled ? null : { 'atLeastOneFieldRequired': true };
+    };
+  }
+
 }
