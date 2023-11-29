@@ -1,7 +1,7 @@
 import { Review } from "./Review";
 
 export interface User {
-    ["user_id"]?: number,
+    id?: number,
     userType?: string,
     ["username"]?: string;
     ["password"]: string;
