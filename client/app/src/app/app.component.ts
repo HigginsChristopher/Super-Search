@@ -45,14 +45,11 @@ export class AppComponent implements OnInit {
     this.userService.setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
-    this.routeHome();
+    this.router.navigate(['/']);
   }
 
   hasRoute(route: string) {
     return this.router.url === route;
   }
 
-  routeHome() {
-    this.router.navigate(['/']);
-  }
 }
