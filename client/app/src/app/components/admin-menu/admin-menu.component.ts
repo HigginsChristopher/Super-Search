@@ -7,6 +7,7 @@ import { IconDefinition, faFlag } from "@fortawesome/free-solid-svg-icons";
 import { faUser as faUserSolid } from '@fortawesome/free-solid-svg-icons';
 import { faUser as faUserHollow } from '@fortawesome/free-regular-svg-icons';
 import { Review } from '../../Review';
+import { ReviewService } from '../../services/review.service';
 
 @Component({
   selector: 'app-admin-menu',
@@ -21,11 +22,12 @@ export class AdminMenuComponent implements OnInit {
   faUserHollow = faUserHollow;
   users: User[] | null = null;
 
-  constructor(private userService: UserService, private titleService: TitleService) { }
+  constructor(private userService: UserService, private titleService: TitleService, private reviewService: ReviewService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Admin Menu');
     this.userService.getAllUserInfo().subscribe(users => {
+      console.log(users)
       this.users = users
     });
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
@@ -36,14 +38,13 @@ export class AdminMenuComponent implements OnInit {
   }
 
   flagUser(user: User) {
-    console.log(`Flagging user: ${user.username}`);
     user.disabled = !user.disabled
     this.userService.disableUser(user).subscribe();
   }
 
-  flagReview(user: User, review: Review) {
+  flagReview(review: Review) {
     review.hidden = !review.hidden;
-    console.log(`Flagging review (ID: ${review.review_id}) for user: ${user.username}`);
+    this.reviewService.flagReview(review).subscribe()
   }
 
   toggleAdminStatus(user: User): void {
@@ -54,7 +55,5 @@ export class AdminMenuComponent implements OnInit {
   getAdminIcon(user: User): IconDefinition {
     return user.userType === 'admin' ? faUserSolid : faUserHollow;
   }
-
- 
 
 }

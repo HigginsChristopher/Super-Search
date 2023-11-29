@@ -2,7 +2,7 @@
 
 <div *ngFor="let user of users" class="user-container">
     <div class="user-header" (dblclick)="toggleReviews(user)">
-        <span>{{ user.username }}</span>
+        <span>Username: {{ user.username }} - User ID: {{user.id}}</span>
 
         <fa-icon (click)="toggleAdminStatus(user)" *ngIf="currentUser?.userType === 'owner'" [icon]="getAdminIcon(user)"
             class="admin-icon" (click)="$event.stopPropagation()"></fa-icon>
@@ -15,7 +15,7 @@
         <div *ngFor="let review of user.reviews" class="review">
             <div class="review-header">
                 Review ID: {{ review.review_id }}
-                <fa-icon (click)="flagReview(user, review)"
+                <fa-icon (click)="flagReview(review)"
                     [ngStyle]="review.hidden ? {'color': 'red'} : {'color': 'green'}" [icon]="faTimes"
                     class="flag-button"></fa-icon>
             </div>
