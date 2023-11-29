@@ -1,52 +1,41 @@
-<!-- dmca-compliance.component.html -->
-<div class="form-control">
-    <h2>DMCA Compliance</h2>
-  
-    <!-- Security and Privacy Policy -->
-    <h3>Security and Privacy Policy</h3>
-    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">Security and Privacy Policy</a></p>
-    <!-- Acceptable Use Policy (AUP) -->
-    <h3>Acceptable Use Policy (AUP)</h3>
-    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">Acceptable Use Policy (AUP)</a></p>
-  
-    <!-- DMCA Notice & Takedown Policy -->
-    <h3>DMCA Notice & Takedown Policy</h3>
-    <p>PDF: <a href="./assets/Security-Policy.pdf" target="_blank">DMCA Notice & Takedown Policy</a></p>
-  
-    <!-- DMCA Takedown Procedure and Tools -->
+<div>
+  <h3>Security and Privacy Policy</h3>
+  <p>HTML: <a href="./assets/Security-and-Privacy-Policy.html" target="_blank">Security and Privacy Policy</a></p>
+  <h3>Acceptable Use Policy (AUP)</h3>
+  <p>HTML: <a href="./assets/Acceptable-Use-Policy.html" target="_blank">Acceptable Use Policy (AUP)</a></p>
+
+  <h3>DMCA Notice & Takedown Policy</h3>
+  <p>HTML: <a href="./assets/DCMA-Notice-and-Takedown-Policy.html" target="_blank">DMCA Notice & Takedown Policy</a></p>
+  <div *ngIf="currentUser?.userType==='admin' || currentUser?.userType==='owner'">
     <h3>DMCA Takedown Procedure and Tools</h3>
-    <!-- Document Workflow and Usage of Tools -->
-    <p>Document describing the workflow and usage of tools.</p>
-  
-    <!-- DMCA Entry Interface -->
-    <h4>DMCA Entry Interface</h4>
-    <!-- Interface to set properties for each review -->
-    <!-- Example: Set up a form for entering details -->
-    <!-- You can add additional fields as needed -->
+    <p>HTML: <a href="./assets/DCMA-Entry-Workflow-and-Tool-Usage.html" target="_blank">Workflow and usage of site DCMA
+        tools</a></p>
+    <h3>DMCA Entry Interface</h3>
     <form (ngSubmit)="submitDmcaEntry()">
       <label for="dateReceived">Date Request Received:</label>
       <input type="date" id="dateReceived" name="dateReceived" required>
-  
+
       <label for="dateNoticeSent">Date Notice Sent:</label>
       <input type="date" id="dateNoticeSent" name="dateNoticeSent" required>
-  
+
       <label for="dateDisputeReceived">Date Dispute Received:</label>
       <input type="date" id="dateDisputeReceived" name="dateDisputeReceived" required>
-  
+
       <label for="notes">Notes:</label>
-      <textarea id="notes" name="notes"></textarea>
-  
+      <textarea rows="4" maxlength="364" id="notes" name="notes" placeholder="Enter notes"></textarea>
+
       <label for="status">Status:</label>
       <select id="status" name="status" required>
         <option value="Active">Active</option>
         <option value="Processed">Processed</option>
       </select>
-  
-      <button type="submit">Submit DMCA Entry</button>
+      <app-button text="Submit DMCA Entry"></app-button>
     </form>
-  
+
     <!-- Tools for hiding and restoring reviews -->
     <h4>Tools for Review Management</h4>
-    <button (click)="hideReviews()">Hide Reviews with Violations</button>
-    <button (click)="restoreReviews()">Restore Contested Reviews</button>
+    <app-button text="Hide Reviews with Violations" (click)="hideReviews()"></app-button>
+    <app-button text="Restore Contested Reviews" (click)="restoreReviews()"></app-button>
   </div>
+
+</div>
