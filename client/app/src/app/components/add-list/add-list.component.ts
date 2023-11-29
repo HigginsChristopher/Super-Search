@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';  // Import necessary modules
 import { List } from '../../List';
 import { UiService } from '../../services/ui.service';
@@ -13,18 +13,21 @@ import { User } from '../../user';
 })
 export class AddListComponent implements OnInit {
   @Output() onAddList: EventEmitter<List> = new EventEmitter();
-  listForm: FormGroup;  
+  @Output() closeModal = new EventEmitter<void>();
+  listForm: FormGroup;
   showAddList: boolean = false;
   subscription: Subscription = new Subscription();
   currentUser: User | null = null;
+  showErrorPopup: boolean = false;
+  errorMessages: string = '';
 
   constructor(private uiService: UiService, private userService: UserService, private fb: FormBuilder) {
     this.subscription = this.uiService.onToggle().subscribe((value) => (this.showAddList = value));
 
     // Initialize the form with FormBuilder
     this.listForm = this.fb.group({
-      list_name: ['', Validators.required],
-      superhero_ids: ['', Validators.required],
+      list_name: ['', [Validators.required]],
+      superhero_ids: ['', [Validators.required]],
       description: [''],
       visibility: [false],
     });
@@ -37,25 +40,53 @@ export class AddListComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.listForm.invalid) {
-      alert("Please fill out the required fields!");
-      return;
+    if (this.listForm.valid) {
+      let superhero_ids = this.listForm.value.superhero_ids;
+      try {
+        superhero_ids = JSON.parse(`[${this.listForm.value.superhero_ids}]`)
+      } catch (ignored) { }
+      const newList = {
+        user_id: this.currentUser?.id!,
+        ["list-name"]: this.listForm.value.list_name,
+        superhero_ids: superhero_ids,
+        description: this.listForm.value.description,
+        visibility: this.listForm.value.visibility
+      };
+      this.onAddList.emit(newList);
+      this.onClosePopup();
     }
-    const newList = {
-      user_id: this.currentUser?.user_id!,
-      ["list-name"]: this.listForm.value.list_name,
-      superhero_ids: JSON.parse(`[${this.listForm.value.superhero_ids}]`),
-      description: this.listForm.value.description,
-      visibility: this.listForm.value.visibility
-    };
-    this.onAddList.emit(newList);
+    else {
+      this.showErrorPopup = true;
+      this.showPopupWithError(this.getFormValidationErrors());
+    }
+  }
 
-    // Reset the form
-    this.listForm.reset({
-      list_name: '',
-      superhero_ids: '',
-      description: '',
-      visibility: false
+  onClosePopup() {
+    this.showErrorPopup = false;
+  }
+
+  // Call this function when you want to show the error popup
+  showPopupWithError(message: any) {
+    this.errorMessages = message;
+    this.showErrorPopup = true;
+  }
+
+  getFormValidationErrors(): string[] {
+    const errorMessages: string[] = [];
+    const errorMapping: { [key: string]: string } = {
+      required: 'is required',
+      email: 'must be a valid email address'
+    };
+
+    Object.keys(this.listForm.controls).forEach(key => {
+      const controlErrors = this.listForm.get(key)!.errors;
+      if (controlErrors != null) {
+        Object.keys(controlErrors).forEach(keyError => {
+          const message = `${key.charAt(0).toUpperCase() + key.slice(1)} ${errorMapping[keyError as keyof typeof errorMapping]}`;
+          errorMessages.push(message);
+        });
+      }
     });
+    return errorMessages;
   }
 }

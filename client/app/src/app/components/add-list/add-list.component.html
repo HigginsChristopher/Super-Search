@@ -1,8 +1,14 @@
+<app-error-popup 
+*ngIf="showErrorPopup" 
+[errorMessage]="errorMessages" 
+[currentUser]="currentUser" 
+(closePopup)="onClosePopup()"></app-error-popup>
+
 <form *ngIf="showAddList" class="add-form" [formGroup]="listForm" (ngSubmit)="onSubmit()">
     <div class="form-control">
         <label for="list_name" text>List-name</label>
         <input type="text" formControlName="list_name" id="list_name" placeholder="Enter List-name..." />
-        <div *ngIf="listForm.get('list-name')?.hasError('required') && listForm.get('list-name')?.touched" class="error-message">
+        <div *ngIf="listForm.get('list_name')?.hasError('required') && listForm.get('list_name')?.touched" class="error-message">
             List-name is required.
         </div>
     </div>
