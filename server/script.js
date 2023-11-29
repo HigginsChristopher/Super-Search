@@ -129,7 +129,7 @@ const review_list = (review) => {
 const get_reviews_list_id = (list_id) => {
     const reviews = review_db.get("reviews")
         .filter(review => {
-            return review.list_id == list_id
+            return (review.list_id == list_id && !review.hidden)
         }).value();
     if (reviews.length == 0) return new Error(`No reviews for given list id.`)
     return reviews;
@@ -198,20 +198,26 @@ const create_user = async (user) => {
 }
 
 const admin_user = user_id => {
-    const user = get_user(user_id);
-    user.assign({ 'userType': "admin" }).write();
+    const user = get_user(parseInt(user_id));
+    if (user instanceof Error) return user.message;
+    if (user.value().userType === "admin") {
+        user.assign({ 'userType': "user" }).write();
+    }
+    else {
+        user.assign({ 'userType': "admin" }).write();
+    }
     return user.value();
 }
 
 const disable_user = user_id => {
-    const user = get_user(user_id);
-    user.assign({ 'disabled': !user_disabled }).write();
+    const user = get_user(parseInt(user_id));
+    user.assign({ 'disabled': !(user.value().disabled) }).write();
     return user.value();
 }
 
 const flag_review = review_id => {
-    const review = get_review(review_id);
-    review.assign({ 'hidden': !review.hidden }).write();
+    const review = get_review(parseInt(review_id));
+    review.assign({ 'hidden': !(review.value().hidden) }).write();
     return review.value();
 }
 
