@@ -19,7 +19,6 @@ const secretKey = "c25a959c1565f04b62c983c9e7413bff2bf873db9a1460a2e91c97f14c092
 // Middleware to authenticate JWT token
 const authenticateToken = (req, res, next) => {
     let token = req.header('Authorization');
-
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }

@@ -27,7 +27,6 @@ export class AdminMenuComponent implements OnInit {
   ngOnInit(): void {
     this.titleService.setTitle('Admin Menu');
     this.userService.getAllUserInfo().subscribe(users => {
-      console.log(users)
       this.users = users
     });
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
