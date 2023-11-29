@@ -3,9 +3,8 @@
     <app-button *ngIf="hasRoute('/lists') && currentUser" color="{{showAddList ? 'red' : 'green'}}"
         text="{{showAddList? 'Close' : 'Add'}}" (btnClick)="toggleAddList()">
     </app-button>
-    <app-button *ngIf="hasRoute('/') && (currentUser?.userType==='admin' || currentUser?.userType==='owner')" text="Admin" (btnClick)="routeAdminMenu()">
-    </app-button>
 </header>
+<h2 *ngIf="currentUser && hasRoute('/')">Welcome back {{currentUser?.username}}!</h2>
 <div *ngIf="hasRoute('/')">
     <h3>About:</h3>
     <div class="about-section">

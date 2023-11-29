@@ -27,5 +27,31 @@ header {
 
 /* Optional: Add a subtle border-radius to the about section */
 .about-section {
+    margin-bottom: 10px;
     border-radius: 8px;
+}
+
+.button-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 60px; /* Adjust the bottom margin as needed */
+}
+
+.button-container > div {
+    flex: 1;
+}
+
+/* Center the middle button */
+.button-container > div:nth-child(2) {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+/* Align the third button to the far right */
+.button-container > div:nth-child(3) {
+    position: absolute;
+    right: 0;
 }

@@ -26,12 +26,13 @@ export class HeaderComponent implements OnInit {
       this.currentUser = user;
     });
     this.updateTitle();
+    this.showAddList = false;
   }
   updateTitle() {
     this.titleService.currentTitle$.subscribe((title) => {
       if (this.currentUser) {
         if (this.hasRoute("/")) {
-          this.title = `${title} - Welcome back ${this.currentUser.username}!`;
+          this.title = `SuperSearch - Homepage`;
         }
         else {
           this.title = title;
@@ -75,9 +76,4 @@ export class HeaderComponent implements OnInit {
     this.updateTitle();
   }
 
-  routeAdminMenu() {
-    const currentUrl = this.router.url;
-    const listsUrl = currentUrl.endsWith('/admin-menu') ? currentUrl : `${currentUrl}/admin-menu`;
-    this.router.navigate([listsUrl]);
-  }
 }
