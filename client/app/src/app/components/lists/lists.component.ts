@@ -36,7 +36,9 @@ export class ListsComponent implements OnInit {
     });
     this.titleService.setTitle('List Manager');
     if (this.currentUser) {
-      this.listService.getPrivateLists().subscribe((lists) => this.privateLists = lists);
+      this.listService.getPrivateLists().subscribe((lists) => {
+        this.privateLists = lists
+      });
     }
     this.listService.getPublicLists().subscribe((lists) => this.publicLists = lists);
   }
@@ -74,6 +76,8 @@ export class ListsComponent implements OnInit {
       (response: any) => {
         if (response.message) {
           this.showPopupWithError(response.message);
+        } else {
+          this.ngOnInit();
         }
       },
       (error: any) => {
@@ -102,7 +106,17 @@ export class ListsComponent implements OnInit {
         this.publicLists.push(res)
       }
       this.privateLists.push(res)
-    });
+    },
+      (error: any) => {
+        if (error instanceof HttpErrorResponse) {
+          // Check for specific HTTP error status codes and handle them
+          this.showPopupWithError(error.error);
+        } else {
+          // Handle non-HTTP errors or display a generic error message
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      }
+    );
     this.ngOnInit();
-  }
+  };
 }
