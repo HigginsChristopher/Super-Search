@@ -1,4 +1,15 @@
 <footer>
-    <p>Copyright &copy; 2023</p>
-    <a routerLink="/about">About</a>
+    <div class="footer-container">
+        <div class="home-button">
+            <app-button *ngIf="!hasRoute('/')" text="Home" (btnClick)="routeHome()"></app-button>
+        </div>
+        <div class="policies" *ngIf="!hasRoute('/dmca-compliance')">
+            <p>Copyright &copy; 2023</p>
+            <a routerLink="/dmca-compliance">Our Policies</a>
+        </div>
+        <app-button class="admin-button"
+            *ngIf=" (currentUser?.userType==='admin' || currentUser?.userType==='owner')" text="Admin"
+            (btnClick)="routeAdminMenu()">
+        </app-button>
+    </div>
 </footer>
