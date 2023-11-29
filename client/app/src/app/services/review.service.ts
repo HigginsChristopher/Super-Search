@@ -4,6 +4,7 @@ import { List } from '../List';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs';
 import { Review } from '../Review';
+import { User } from '../user';
 
 
 const httpOptions = {
@@ -17,14 +18,15 @@ const httpOptions = {
 })
 export class ReviewService {
   private jwtToken: string | null | undefined = null;
-  private headers: HttpHeaders;
+  private headers!: HttpHeaders;
 
   constructor(private http: HttpClient) {
-    let token = localStorage.getItem('token');
-    token = token ? JSON.parse(token) : null;
-    this.jwtToken = token
+    this.loadToken();
+  }
 
-    // Initialize headers with the authorization token
+  private loadToken() {
+    let token = localStorage.getItem('token');
+    this.jwtToken = token ? JSON.parse(token) : null;
     this.headers = new HttpHeaders()
       .set('Authorization', `Bearer ${this.jwtToken}`)
       .set('Content-Type', 'application/json');
@@ -41,6 +43,7 @@ export class ReviewService {
 
 
   createReview(review: any): Observable<Review[]> {
+    this.loadToken();
     const url = `/api/secure/lists/reviews/`
     return this.http.post<Review[]>(url, review, { headers: this.headers }).pipe(
       catchError((error: any) => {
@@ -49,4 +52,13 @@ export class ReviewService {
     );
   }
 
+  flagReview(review: Review): Observable<Review> {
+    this.loadToken();
+    const url = `/api/admin/reviews/flag/${review.review_id}`
+    return this.http.post<Review>(url, null, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
+  }
 }

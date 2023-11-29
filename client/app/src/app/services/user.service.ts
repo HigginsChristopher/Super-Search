@@ -16,14 +16,15 @@ export class UserService {
   private userSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
   public user$: Observable<User | null> = this.userSubject.asObservable();
   private jwtToken: string | null | undefined = null;
-  private headers: HttpHeaders;
+  private headers!: HttpHeaders;
 
   constructor(private http: HttpClient) {
-    let token = localStorage.getItem('token');
-    token = token ? JSON.parse(token) : null;
-    this.jwtToken = token
+    this.loadToken();
+  }
 
-    // Initialize headers with the authorization token
+  private loadToken() {
+    let token = localStorage.getItem('token');
+    this.jwtToken = token ? JSON.parse(token) : null;
     this.headers = new HttpHeaders()
       .set('Authorization', `Bearer ${this.jwtToken}`)
       .set('Content-Type', 'application/json');
@@ -57,20 +58,21 @@ export class UserService {
 
   verifyUser(verificationToken: string): Observable<any> {
     const url = `/api/open/users/verify?token=${verificationToken}`
-    return this.http.get<any>(url);
+    return this.http.get<any>(url, httpOptions);
   }
 
   getUserName(userId: any): Observable<any> {
     const url = `/api/open/users/${userId}`
-    return this.http.get<any>(url);
+    return this.http.get<any>(url, httpOptions);
   }
 
   resendVerification(user: any): Observable<any> {
     const url = `/api/open/users/verify/resend`
-    return this.http.post<any>(url,user);
+    return this.http.post<any>(url, user, httpOptions);
   }
 
-  getAllUserInfo(): Observable<User[]>{
+  getAllUserInfo(): Observable<User[]> {
+    this.loadToken();
     const url = `/api/admin/users`;
     return this.http.get<User[]>(url, { headers: this.headers }).pipe(
       catchError((error: any) => {
@@ -79,18 +81,20 @@ export class UserService {
     );
   }
 
-  disableUser(user: User): Observable<User>{
-    const url = `/api/admin/users/disable/${user.user_id}`;
-    return this.http.post<User>(url, { headers: this.headers }).pipe(
+  disableUser(user: any): Observable<User> {
+    this.loadToken();
+    const url = `/api/admin/users/disable/${user.id}`;
+    return this.http.post<User>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  adminUser(user: User): Observable<User>{
-    const url = `/api/owner/users/admin/${user.user_id}`;
-    return this.http.post<User>(url, { headers: this.headers }).pipe(
+  adminUser(user: any): Observable<User> {
+    this.loadToken();
+    const url = `/api/owner/users/admin/${user.id}`;
+    return this.http.post<User>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
