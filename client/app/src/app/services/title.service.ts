@@ -7,12 +7,12 @@ import { filter } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class TitleService {
-  private titleSubject = new BehaviorSubject<string>('Homepage');
+  private titleSubject = new BehaviorSubject<string>('SuperSearch - Homepage');
   currentTitle$ = this.titleSubject.asObservable();
 
   constructor(private router: Router) {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      this.setTitle('Homepage');
+      this.setTitle('SuperSearch - Homepage');
     });
   }
 

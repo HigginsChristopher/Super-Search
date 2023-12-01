@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
   constructor(private titleService: TitleService, private router: Router, private userService: UserService) { }
 
   ngOnInit(): void {
-    this.titleService.setTitle("Homepage");
+    this.titleService.setTitle("SuperSearch - Homepage");
 
     const token = JSON.parse(localStorage.getItem('token')!);
     const currentUser = JSON.parse(localStorage.getItem('userData')!);
