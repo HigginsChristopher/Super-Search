@@ -4,7 +4,7 @@
         text="{{showAddList? 'Close' : 'Add'}}" (btnClick)="toggleAddList()">
     </app-button>
 </header>
-<h2 *ngIf="currentUser && hasRoute('/')">Welcome back {{currentUser?.username}}!</h2>
+<h2 *ngIf="currentUser && hasRoute('/')">Welcome back {{currentUser.username}}!</h2>
 <div *ngIf="hasRoute('/')">
     <h3>About:</h3>
     <div class="about-section">
@@ -19,7 +19,7 @@
             </app-button>
         </div>
         <div *ngIf="currentUser">
-            <app-button  text="Logout" (btnClick)="routeLogout()">
+            <app-button  text="Account" (btnClick)="routeAccount()">
             </app-button>
         </div>
         <div>

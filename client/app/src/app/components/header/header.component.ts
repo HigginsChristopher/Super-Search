@@ -52,28 +52,19 @@ export class HeaderComponent implements OnInit {
   }
 
   routeLogin() {
-    const currentUrl = this.router.url;
-    const listsUrl = currentUrl.endsWith('/login') ? currentUrl : `${currentUrl}/login`;
-    this.router.navigate([listsUrl]);
+    this.router.navigate(["/login"]);
   }
 
   routeLists() {
-    const currentUrl = this.router.url;
-    const listsUrl = currentUrl.endsWith('/lists') ? currentUrl : `${currentUrl}/lists`;
-    this.router.navigate([listsUrl]);
+    this.router.navigate(["/lists"]);
   }
 
   routeHero() {
-    const currentUrl = this.router.url;
-    const listsUrl = currentUrl.endsWith('/hero-search') ? currentUrl : `${currentUrl}/hero-search`;
-    this.router.navigate([listsUrl]);
+    this.router.navigate(['/hero-search']);
   }
 
-  routeLogout() {
-    this.userService.setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("userData");
-    this.updateTitle();
+  routeAccount(){
+    this.router.navigate(["/account"]);
   }
 
 }
