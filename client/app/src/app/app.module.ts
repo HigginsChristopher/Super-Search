@@ -22,6 +22,9 @@ import { ListModificationComponent } from './components/list-modification/list-m
 import { WriteReviewComponent } from './components/write-review/write-review.component';
 import { AdminMenuComponent } from './components/admin-menu/admin-menu.component';
 import { IsAdminGuard } from './guards/admin.guard';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { AccountComponent } from './components/account/account.component';
+import { IsUserGuard } from './guards/user.guard';
 
 const appRoutes: Routes = [
   { path: "lists", component: ListsComponent },
@@ -34,6 +37,12 @@ const appRoutes: Routes = [
     component: AdminMenuComponent,
     canActivate: [IsAdminGuard]
   },
+  { path: "reset-password", component: ResetPasswordComponent },
+  {
+    path: "account",
+    component: AccountComponent,
+    canActivate: [IsUserGuard]
+  }
 
 ]
 @NgModule({
@@ -53,7 +62,9 @@ const appRoutes: Routes = [
     SuperheroModalComponent,
     ListModificationComponent,
     WriteReviewComponent,
-    AdminMenuComponent
+    AdminMenuComponent,
+    ResetPasswordComponent,
+    AccountComponent
   ],
   imports: [
     BrowserModule,
