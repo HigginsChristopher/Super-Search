@@ -100,4 +100,15 @@ export class UserService {
       })
     );
   }
+
+  forgotPassword(user: User): Observable<any> {
+    const url = `/api/open/users/recovery`
+    return this.http.post<any>(url, { email: user.email }, httpOptions);
+  }
+
+  updatePassword(password: string): Observable<any> {
+    this.loadToken();
+    const url = `/api/secure/users/password/`
+    return this.http.post<any>(url, { password: password }, { headers: this.headers });
+  }
 }
