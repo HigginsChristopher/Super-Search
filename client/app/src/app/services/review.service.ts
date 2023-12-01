@@ -52,13 +52,19 @@ export class ReviewService {
     );
   }
 
-  flagReview(review: Review): Observable<Review> {
+  flagReview(review_id: any): Observable<Review> {
     this.loadToken();
-    const url = `/api/admin/reviews/flag/${review.review_id}`
+    const url = `/api/admin/reviews/flag/${review_id}`
     return this.http.post<Review>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
+  }
+
+  getReviews(): Observable<Review[]> {
+    this.loadToken();
+    const url = `/api/admin/reviews/`
+    return this.http.get<Review[]>(url, { headers: this.headers });
   }
 }
