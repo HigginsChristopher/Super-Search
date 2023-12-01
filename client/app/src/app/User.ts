@@ -4,8 +4,8 @@ export interface User {
     id?: number,
     userType?: string,
     ["username"]?: string;
-    ["password"]: string;
-    ["email"]: string;
+    ["password"]?: string;
+    ["email"]?: string;
     ["verificationToken"]?: string;
     ["jwtToken"]?: string;
     ["verified"]?: boolean;
