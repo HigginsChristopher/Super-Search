@@ -57,13 +57,6 @@ const checkOwner = (req, res, next) => {
 };
 
 // MIDDLEWARE
-// // Add this middleware to enable CORS
-// app.use((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-//     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//     next();
-// });
 
 // Middleware to make data in body and response is in JSON
 app.use(express.json());
@@ -83,6 +76,27 @@ app.use((req, res, next) => {
 
 
 // ENDPOINTS
+app.post('/api/admin/dcma/', authenticateToken, async (req, res) => {
+    const claim = superhero_util.create_claim(req.body.dcma);
+    res.send(claim);
+});
+
+app.post('/api/admin/dcma/:id', authenticateToken, async (req, res) => {
+    req.body.dcma.claim_id = req.params.id;
+    const claim = superhero_util.update_claim(req.body.dcma);
+    res.send(claim);
+});
+
+app.get('/api/admin/dcma/', authenticateToken, async (req, res) => {
+    const claims = superhero_util.get_claims();
+    res.send(claims);
+});
+
+
+app.get('/api/admin/reviews/', authenticateToken, async (req, res) => {
+    const reviews = superhero_util.get_reviews();
+    res.send(reviews);
+});
 
 app.post('/api/owner/users/admin/:id', authenticateToken, checkOwner, async (req, res) => {
     const users = superhero_util.admin_user(req.params.id);
@@ -151,7 +165,25 @@ app.post('/api/open/users/register', async (req, res) => {
     }
 });
 
+// Registration endpoint
+app.post('/api/open/users/recovery', async (req, res) => {
+    const user = superhero_util.account_recovery(req.body.email);
+    if (!(user instanceof Error)) {
+        const token = jwt.sign({ user_id: user.id, email: user.email, username: user.username, userType: user.userType }, secretKey, { expiresIn: '1h' });
+        res.json({ token: token });
+    } else {
+        res.status(401).json({ message: user.message });
+    }
+});
 
+app.post('/api/secure/users/password/', authenticateToken, async (req, res) => {
+    const user = superhero_util.reset_password(req.user.user_id,req.body.password);
+    if (!(user instanceof Error)) {
+        res.json(user);
+    } else {
+        res.status(401).json({ message: user.message });
+    }
+});
 
 // Verification endpoint
 app.get('/api/open/users/verify', async (req, res) => {
