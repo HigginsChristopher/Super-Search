@@ -1,4 +1,4 @@
-<div class="popup-container">
+<div class="popup-container" (dblclick)="$event.stopPropagation()">
   <div class="popup-content">
     <fa-icon class="close-button" (click)="onCloseButtonClick()" [icon]="faTimes"></fa-icon>
     <div *ngIf="isArray()" class="hero-details">
@@ -14,10 +14,32 @@
           If you haven't received an email, you can
           <a (click)="resendVerification()" class="resend-link">resend the verification email</a>.
         </p>
-        <p *ngIf="currentUser">{{mockEmail}}<a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a></p>
+        <div *ngIf="registrationSuccess" class="smallText">
+          <br>
+          <p>Registration successful! Please check your email to verify your account.</p>
+          <p>Mock Email:</p>
+          <p>From: Do Not Reply &lt;myEmail&#64;myService.myDomain&gt;</p>
+          <p>To: &lt;{{currentUser?.email}}&gt;</p>
+          <p>Subject: Resent account verification. Please confirm account for SuperSearch</p>
+          <p>Text: To verify your account click the following link:</p>
+          <a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a>
+        </div>
       </div>
       <div *ngIf="errorMessage=='Wrong password.'">
         <p>Forgot password? <a class="resend-link" (click)="onForgot()">Send recovery email</a></p>
+        <div *ngIf="forgotSuccess" class="smallText">
+          <br>
+          <p>Account recovery successful! Please check your email to verify your account.</p>
+          <p>Mock Email:</p>
+          <p>From: Do Not Reply &lt;myEmail&#64;myService.myDomain&gt;</p>
+          <p>To: &lt;{{currentUser?.email}}&gt;</p>
+          <p>Subject: Account recovery - SuperSearch</p>
+          <p>Text: To verify your account click the following link:</p>
+          <a class="resend-link" (click)="onReset()">{{verifyUrl}}</a>
+        </div>
+      </div>
+      <div *ngIf="errorMessage=='Are you sure you want to delete this list?'">
+        <app-button text="Delete" (click)="onDeleteList()"></app-button>
       </div>
     </div>
   </div>

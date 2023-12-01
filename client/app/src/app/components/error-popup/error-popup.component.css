@@ -1,6 +1,7 @@
 /* error-popup.component.css */
 
 .popup-container {
+  z-index: 1000;
   position: fixed;
   top: 0;
   left: 0;
@@ -85,7 +86,11 @@
   text-decoration: underline;
   color: blue;
   cursor: pointer;
+  word-wrap: break-word;
+  max-width: 100%;
 }
-.smallText{
-font-size: medium;
+
+.smallText {
+  font-size: small;
+  max-width: 100%; /* You can adjust this value based on your layout requirements */
 }
