@@ -36,13 +36,20 @@ const id_adapter = new FileSync("../data/ids.json");
 const id_db = low(id_adapter)
 id_db.read();
 // Default if ids.json doesn't exists
-id_db.defaults({ "highestUserId": -1, "highestListId": -1, "highestReviewId": -1 }).write();
+id_db.defaults({ "highestUserId": -1, "highestListId": -1, "highestReviewId": -1, "highestClaimId": -1 }).write();
 
 // ID database for lists and syncing it with an adapter
 const review_adapter = new FileSync("../data/reviews.json");
 const review_db = low(review_adapter)
 review_db.read();
 review_db.defaults({ reviews: [] }).write();
+
+
+// ID database for lists and syncing it with an adapter
+const dcma_adapter = new FileSync("../data/dcma.json");
+const dcma_db = low(dcma_adapter)
+dcma_db.read();
+dcma_db.defaults({ claims: [] }).write();
 
 
 // Method to sanitize objects contents, remove HTML, JS and CSS elements #EXTRA LAYER
@@ -169,14 +176,22 @@ const get_review = (review_id) => {
     return review;
 }
 
+const reset_password = async (user_id, password) => {
+    const user = user_db.get("users").find({ "id": user_id });
+    if (user.value() === undefined) return new Error(`No users for given id.`);
+    const hash = await hashPassword(password);
+    user.assign({ "password": hash }).write();
+    return user;
+}
+
 const login_user = async (user) => {
     const email = user_db.get("users").find({ "email": user.email }).value();
     if (email === undefined) return new Error(`No users for given email.`)
     const approve = await comparePasswords(user.password, email.password)
     // Return error if no result for given id
+    if (email.disabled) return new Error(`Account disabled! Contact a site adminstrator.`)
     if (!approve) return new Error(`Wrong password.`)
     if (!email.verified) return new Error(`Account not verified! Check your email for verification email.`)
-    if (email.disabled) return new Error(`Account disabled! Contact a site adminstrator.`)
     return email;
 }
 
@@ -195,6 +210,37 @@ const create_user = async (user) => {
     const newUser = { "id": newHighestId, "username": user.username, "password": hash, "email": user.email, "verificationToken": verificationToken, verified: false, userType: "user", disabled: false };
     user_db.get("users").push(newUser).write();
     return newUser;
+}
+const get_claims = () => {
+    return dcma_db.get("claims").value();
+}
+
+const get_reviews = () => {
+    return review_db.get("reviews").value();
+}
+
+const create_claim = (dcma) => {
+    const currentHighestId = id_db.get('highestClaimId').value();
+    const newHighestId = currentHighestId + 1;
+    id_db.set('highestClaimId', newHighestId)
+        .write();
+    const newClaim = { "claim_id": newHighestId, "date_recieved": dcma.date_recieved, "date_notice_sent": dcma.date_notice_sent, "date_dispute_recieved": dcma.date_dispute_recieved, "notes": dcma.notes, "status": dcma.status, "reviews": dcma.reviews };
+    dcma_db.get("claims").push(newClaim).write();
+    return newClaim;
+}
+
+const update_claim = (dcma) => {
+    const claim = dcma_db.get('claims').find({ "claim_id": parseInt(dcma.claim_id) });
+    if (claim.value() === undefined) return new Error("Claim ID does not exists!");
+    claim.assign({ "date_recieved": dcma.date_recieved, "date_notice_sent": dcma.date_notice_sent, "date_dispute_recieved": dcma.date_dispute_recieved, "notes": dcma.notes, "status": dcma.status, "reviews": dcma.reviews }).write();
+    return claim.value();
+}
+
+const account_recovery = (email) => {
+    const user = user_db.get("users").find({ "email": email }).value();
+    if (user === undefined) return new Error("Email not found!");
+    if (user.disabled) return new Error("Disabled users can not recover their account!");
+    return user;
 }
 
 const admin_user = user_id => {
@@ -516,6 +562,9 @@ const validate_match = (field, match, n) => {
 
 // Exporting methods for usage inside server.js
 module.exports = {
+    get_reviews,
+    get_claims,
+    create_claim,
     create_user,
     resend_verification,
     get_private_lists,
@@ -548,5 +597,8 @@ module.exports = {
     get_all_user_info,
     disable_user,
     flag_review,
-    admin_user
+    admin_user,
+    update_claim,
+    account_recovery,
+    reset_password
 };
