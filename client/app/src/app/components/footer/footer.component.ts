@@ -13,7 +13,6 @@ export class FooterComponent implements OnInit {
   constructor(private router: Router, private userService: UserService) { }
   ngOnInit(): void {
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
-    
   }
   routeHome() {
     this.router.navigate(['/']);
@@ -23,8 +22,6 @@ export class FooterComponent implements OnInit {
   }
 
   routeAdminMenu() {
-    const currentUrl = this.router.url;
-    const listsUrl = currentUrl.endsWith('/admin-menu') ? currentUrl : `${currentUrl}/admin-menu`;
-    this.router.navigate([listsUrl]);
+    this.router.navigate(["/admin-menu"]);
   }
 }

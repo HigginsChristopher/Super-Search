@@ -6,6 +6,8 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { User } from '../../user';
+import { jwtDecode } from 'jwt-decode';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -45,10 +47,10 @@ export class LoginComponent implements OnInit {
       this.userService.loginUser(user).subscribe(
         (response: any) => {
           localStorage.setItem('token', JSON.stringify(response.token));
-          const user = this.decodeJwt(response.token);
+          const user = jwtDecode(response.token)
           localStorage.setItem('userData', JSON.stringify(user));
-          this.userService.setUser(user);
-          this.router.navigate(['/'])
+          this.userService.setUser(user as User);
+          this.showPopupWithError("Login Successful");
         },
         (error: any) => {
           if (error instanceof HttpErrorResponse) {
@@ -76,20 +78,6 @@ export class LoginComponent implements OnInit {
     this.showErrorPopup = true;
   }
 
-  decodeJwt(token: string) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  }
-
   getFormValidationErrors(): string[] {
     const errorMessages: string[] = [];
     const errorMapping: { [key: string]: string } = {
@@ -110,6 +98,9 @@ export class LoginComponent implements OnInit {
   }
 
   onClosePopup() {
+    if(this.errorMessages==="Login Successful"){
+      this.router.navigate(['/'])
+    }
     this.showErrorPopup = false;
   }
 
