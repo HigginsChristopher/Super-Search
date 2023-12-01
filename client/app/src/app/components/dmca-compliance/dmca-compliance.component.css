@@ -26,7 +26,7 @@ a:hover {
 }
 
 form {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 label {
@@ -40,8 +40,6 @@ textarea,
 select {
     width: 100%;
     padding: 8px;
-    margin-top: 6px;
-    margin-bottom: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
@@ -50,6 +48,24 @@ select {
 select {
     height: 36px;
 }
+
+#reviewIds{
+    max-height: 300px; 
+    overflow-y: auto;
+    height: 150px;
+    
+}
+
+/* Style for the lines between options */
+#reviewIds option {
+    border-bottom: 1px solid #ccc;
+    padding: 5px; /* Optional: Add some padding to make it visually appealing */
+  }
+  
+  /* Style for the last option to remove the bottom border */
+  #reviewIds option:last-child {
+    border-bottom: none;
+  }
 
 
 button:hover {

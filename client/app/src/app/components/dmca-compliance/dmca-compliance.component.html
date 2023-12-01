@@ -1,4 +1,6 @@
 <div>
+  <app-error-popup *ngIf="showErrorPopup" [errorMessage]="errorMessages"
+  (closePopup)="onClosePopup()"></app-error-popup>
   <h3>Security and Privacy Policy</h3>
   <p>HTML: <a href="./assets/Security-and-Privacy-Policy.html" target="_blank">Security and Privacy Policy</a></p>
   <h3>Acceptable Use Policy (AUP)</h3>
@@ -11,31 +13,81 @@
     <p>HTML: <a href="./assets/DCMA-Entry-Workflow-and-Tool-Usage.html" target="_blank">Workflow and usage of site DCMA
         tools</a></p>
     <h3>DMCA Entry Interface</h3>
-    <form (ngSubmit)="submitDmcaEntry()">
-      <label for="dateReceived">Date Request Received:</label>
-      <input type="date" id="dateReceived" name="dateReceived" required>
+    <form [formGroup]="dmcaForm">
+      <!-- Add a dropdown to choose between creating a new entry or editing an existing one -->
+      <div class="form-group">
+        <label for="entryAction">Select Action:</label>
+        <select id="entryAction" name="entryAction" formControlName="entryAction" (change)="resetForm()">
+          <option value="create">Create New Entry</option>
+          <option value="edit">Edit Existing Entry</option>
+        </select>
+      </div>
 
-      <label for="dateNoticeSent">Date Notice Sent:</label>
-      <input type="date" id="dateNoticeSent" name="dateNoticeSent" required>
+      <!-- If "edit" is selected, display a dropdown to choose from existing entries -->
+      <div class="form-group" *ngIf="dmcaForm.value.entryAction === 'edit'">
+        <label for="existingEntryId">Select Existing Entry:</label>
+        <select id="existingEntryId" name="existingEntryId" formControlName="existingEntryId"
+          (change)="onExistingEntrySelected()">
+          <option *ngFor="let entry of dcmaClaims" [value]="entry.claim_id">Entry ID: {{ entry.claim_id }} - Date
+            Recieved:
+            {{entry.date_recieved}} </option>
+        </select>
+      </div>
 
-      <label for="dateDisputeReceived">Date Dispute Received:</label>
-      <input type="date" id="dateDisputeReceived" name="dateDisputeReceived" required>
+      <div class="form-group">
+        <label for="dateReceived">Date Request Received:</label>
+        <input type="date" id="dateReceived" name="dateReceived" formControlName="dateReceived">
+        <p *ngIf="isFieldInvalid('dateReceived')">Date Request Received is required.</p>
+      </div>
 
-      <label for="notes">Notes:</label>
-      <textarea rows="4" maxlength="364" id="notes" name="notes" placeholder="Enter notes"></textarea>
+      <div class="form-group">
+        <label for="dateNoticeSent">Date Notice Sent:</label>
+        <input type="date" id="dateNoticeSent" name="dateNoticeSent" formControlName="dateNoticeSent">
+        <p *ngIf="isFieldInvalid('dateNoticeSent')">Date Notice Sent is required.</p>
+      </div>
 
-      <label for="status">Status:</label>
-      <select id="status" name="status" required>
-        <option value="Active">Active</option>
-        <option value="Processed">Processed</option>
-      </select>
-      <app-button text="Submit DMCA Entry"></app-button>
+      <div class="form-group">
+        <label for="dateDisputeReceived">Date Dispute Received:</label>
+        <input type="date" id="dateDisputeReceived" name="dateDisputeReceived" formControlName="dateDisputeReceived">
+        <p *ngIf="isFieldInvalid('dateDisputeReceived')">Date Dispute Received is required.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes:</label>
+        <textarea rows="4" maxlength="364" id="notes" name="notes" formControlName="notes"
+          placeholder="Enter notes"></textarea>
+        <p *ngIf="isFieldInvalid('notes')">Notes are required.</p>
+      </div>
+      <div class="form-group">
+        <label for="reviewIds">Select Review IDs:</label>
+        <select multiple id="reviewIds" name="reviewIds" formControlName="reviewIds">
+          <option *ngFor="let review of reviews" [value]="review.review_id">ID: {{ review.review_id }}- Hidden:
+            {{review.hidden}} - Comment:
+            {{review.comment}} </option>
+        </select>
+        <div *ngIf="dmcaForm.value.reviewIds.length>0">
+          <app-button text="Hide Reviews with Violations" (click)="hideReviews()"></app-button>
+          <app-button text="Restore Contested Reviews" (click)="restoreReviews()"></app-button>
+        </div>
+
+        <p *ngIf="isFieldInvalid('reviewIds')">Review IDs are required.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status:</label>
+        <select id="status" name="status" formControlName="status">
+          <option value="Active">Active</option>
+          <option value="Processed">Processed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <app-button *ngIf="dmcaForm.value.entryAction === 'create'" text="Create DMCA Entry"
+          (click)="submitDmcaEntry()"></app-button>
+        <app-button *ngIf="dmcaForm.value.entryAction === 'edit' && dmcaForm.value.existingEntryId != '' "
+          text="Update DMCA Entry" (click)="updateDmcaEntry()"></app-button>
+      </div>
     </form>
 
-    <!-- Tools for hiding and restoring reviews -->
-    <h4>Tools for Review Management</h4>
-    <app-button text="Hide Reviews with Violations" (click)="hideReviews()"></app-button>
-    <app-button text="Restore Contested Reviews" (click)="restoreReviews()"></app-button>
   </div>
 
 </div>
