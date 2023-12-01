@@ -111,8 +111,8 @@ export class ListItemComponent implements OnInit {
     });
   }
 
-  onDelete(list: List) {
-    this.onDeleteList.emit(list);
+  onDelete() {
+    this.showPopupWithError("Are you sure you want to delete this list?")
   }
 
   onToggle(list: List) {
@@ -156,7 +156,13 @@ export class ListItemComponent implements OnInit {
     this.errorMessages = message;
     this.showErrorPopup = true;
   }
+
   onClosePopup() {
     this.showErrorPopup = false;
+  }
+
+  emitDelete(list: any){
+    this.onClosePopup();
+    this.onDeleteList.emit(list);
   }
 }

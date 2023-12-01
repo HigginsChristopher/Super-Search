@@ -1,6 +1,12 @@
 <div [ngClass]="{visibility: list.visibility}" class="list" (dblclick)="toggleExpand(list)"
     (mousedown)="startLongPressTimer($event,list)" (mouseup)="clearLongPressTimer()"
     (mouseleave)="clearLongPressTimer()" [class.expandable]="!expanded">
+    <app-error-popup *ngIf="showErrorPopup" 
+    [errorMessage]="errorMessages" 
+    [currentUser]="currentUser"
+    (closePopup)="onClosePopup()"
+    (deleteList)="emitDelete(list)"
+    ></app-error-popup>
     <div>
         <div *ngIf="listType=='public'">
             <h3>{{"List-name: " +list["list-name"]}} - Last Modified: {{formattedDateTime}}</h3>
@@ -8,7 +14,7 @@
                 rating: {{list.rating}} </p>
         </div>
         <div *ngIf="listType=='private'">
-            <h3>{{"List-name: " +list["list-name"]}} <fa-icon (click)="onDelete(list)" [ngStyle]="{'color': 'red'}"
+            <h3>{{"List-name: " +list["list-name"]}} <fa-icon (click)="onDelete()" [ngStyle]="{'color': 'red'}"
                     [icon]="faTimes"></fa-icon></h3>
         </div>
         <div *ngIf="expanded" class="search-results">
