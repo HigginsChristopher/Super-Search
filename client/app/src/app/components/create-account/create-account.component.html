@@ -10,7 +10,7 @@
                 *ngIf="createAccountForm.get('email')?.hasError('required') && createAccountForm.get('email')?.touched">
                 Email is required.
             </div>
-            <div *ngIf="createAccountForm.get('email')?.hasError('email') && createAccountForm.get('email')?.touched">
+            <div *ngIf="!validateEmail(createAccountForm.get('email')?.value) && createAccountForm.get('email')?.touched && createAccountForm.get('email')!.value!==''">
                 Invalid email format.
             </div>
         </div>
@@ -35,6 +35,11 @@
     <div *ngIf="registrationSuccess" class="smallText">
         <br>
         <p>Registration successful! Please check your email to verify your account.</p>
-        <pre *ngIf="createdUser">{{mockEmail}}<a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a></pre>
+        <p>Mock Email:</p>
+        <p>From: Do Not Reply &lt;myEmail&#64;myService.myDomain&gt;</p>
+        <p>To: &lt;{{createdUser?.email}}&gt;</p>
+        <p>Subject: Please confirm account for SuperSearch</p>
+        <p>Text: To verify your account click the following link:</p>
+        <a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a>
     </div>
 </div>

@@ -1,8 +1,12 @@
 .resend-link {
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer;
-  }
-.smallText{
-  font-size: medium;
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+.smallText {
+  font-size: small;
+  max-width: 100%; /* You can adjust this value based on your layout requirements */
 }
