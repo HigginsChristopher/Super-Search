@@ -21,6 +21,8 @@ export class AdminMenuComponent implements OnInit {
   faUserSolid = faUserSolid;
   faUserHollow = faUserHollow;
   users: User[] | null = null;
+  showErrorPopup: boolean = false;
+  errorMessages: string = '';
 
   constructor(private userService: UserService, private titleService: TitleService, private reviewService: ReviewService) { }
 
@@ -43,7 +45,7 @@ export class AdminMenuComponent implements OnInit {
 
   flagReview(review: Review) {
     review.hidden = !review.hidden;
-    this.reviewService.flagReview(review).subscribe()
+    this.reviewService.flagReview(review.review_id).subscribe()
   }
 
   toggleAdminStatus(user: User): void {
