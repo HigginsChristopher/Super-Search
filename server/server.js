@@ -29,6 +29,26 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Middleware for list expansion (check if user is authenticated to get their id)
+const checkUser = (req, res, next) => {
+    let token = req.header('Authorization');
+    if (!token) {
+        next();
+    }
+    else {
+        token = token.split(' ')[1]
+    }
+    jwt.verify(token, secretKey, (err, user) => {
+        // Token expired
+        if (err) {
+            next();
+        }
+        // User authenticated
+        req.user = user;
+        next();
+    });
+};
+
 // Middleware to authenticate admin
 const checkAdmin = (req, res, next) => {
     if (req.user && (req.user.userType === "admin" || req.user.userType === "owner")) {
@@ -238,6 +258,21 @@ app.route("/api/secure/lists/")
         if (list instanceof Error) return res.status(404).send({ message: list.message });
         res.send({ list: list });
     })
+
+// Endpoint to GET list details for given list id (accessible by all users)
+app.get("/api/open/lists/:id", checkUser, (req, res) => {
+    const { error } = superhero_util.validate_id(req.params.id);
+    if (error) return res.status(400).send({ message: error.details[0].message });
+    let list
+    if (req.user) {
+        list = superhero_util.expand_list(parseInt(req.params.id), req.user.user_id);
+    }
+    else {
+        list = superhero_util.expand_list(parseInt(req.params.id));
+    }
+    if (list instanceof Error) return res.status(404).send({ message: list.message });
+    res.send({ list: list });
+})
 
 // Route to handle /api/secure/lists/:id
 app.route("/api/secure/lists/:id")
