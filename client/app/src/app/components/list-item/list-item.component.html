@@ -41,7 +41,7 @@
             <ul class="list" *ngIf="list.reviews">
                 <h3>Reviews:</h3>
                 <li *ngFor="let review of list.reviews" class="hero-details">
-                    <p>Review by: {{review.username}} - Score {{review.rating}}/5</p>
+                    <p>Review by: {{review.username}} - Rating {{review.rating}}/5 - Date: {{review.formattedDateTime}}</p>
                     <p>Comment: {{review.comment}}</p>
                 </li>
             </ul>

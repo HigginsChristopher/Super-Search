@@ -107,6 +107,8 @@ export class ListsComponent implements OnInit {
         this.publicLists.push(response.list)
       }
       this.privateLists.push(response.list)
+      this.ngOnInit();
+
     },
       (errorResponse: any) => {
         if (errorResponse instanceof HttpErrorResponse) {
@@ -118,21 +120,78 @@ export class ListsComponent implements OnInit {
         }
       }
     );
-    this.ngOnInit();
   };
 
-  expandList(list: List){
-    // get the list based on the new superhero id list, if the list doesnt exist (visibility has changed or deleted then bring up message and refresh)
-    this.heroService.displayDetails(list.superhero_ids).subscribe((response) => list.superheroes = response.heroes);
-    this.reviewService.displayReviews(list.list_id).subscribe((response) => {
-      list.reviews = response.reviews;
-      if (list.reviews) {
-        for (let review of list.reviews) {
-          this.userService.getUserName(review.user_id).subscribe(response => {
-            review.username = response.username
-          });
-        }
+  expandList(list: List) {
+
+    // get the list based on the new superhero id list
+    this.listService.getList(list.list_id).subscribe(
+      (response) => {
+        response = response.list
+
+        list.superhero_ids = response.superhero_ids;
+        list.description = response.description;
+        list["list-name"] = response["list-name"];
+
+
+        // Fetch superhero details
+        this.heroService.displayDetails(response.superhero_ids).subscribe(
+          (heroResponse) => {
+            list.superheroes = heroResponse.heroes;
+
+            // Fetch reviews
+            this.reviewService.displayReviews(response.list_id).subscribe(
+              (reviewResponse) => {
+                if (reviewResponse.reviews) {
+                  for (const review of reviewResponse.reviews) {
+                    review.formattedDateTime = this.timestampToDate(review.created);
+                  }
+                }
+                list.reviews = reviewResponse.reviews;
+
+                // Update usernames in reviews
+                if (list.reviews) {
+                  for (let review of list.reviews) {
+                    this.userService.getUserName(review.user_id).subscribe(
+                      (usernameResponse) => {
+                        review.username = usernameResponse.username;
+                      },
+                      (error) => {
+                        console.error("Error fetching username:", error);
+                      }
+                    );
+                  }
+                }
+              },
+              (error) => {
+                console.error("Error fetching reviews:", error);
+              }
+            );
+          },
+          (error) => {
+            console.error("Error fetching superhero details:", error);
+          }
+        );
+      },
+      (error) => {
+        this.showPopupWithError(error.error.message);
+        this.ngOnInit();
       }
-    });
+    );
+  }
+
+  timestampToDate(timestamp: any): string {
+    // Create a new Date object and pass the timestamp as an argument
+    const date = new Date(timestamp);
+    // Use various methods of the Date object to extract different components of the date
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Months are zero-based, so add 1
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0'); // Ensure leading zero
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure leading zero
+    const seconds = date.getSeconds().toString().padStart(2, '0'); // Ensure leading zero
+
+    // Format the components using toLocaleString
+    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
   }
 }

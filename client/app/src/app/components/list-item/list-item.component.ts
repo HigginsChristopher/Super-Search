@@ -82,19 +82,10 @@ export class ListItemComponent implements OnInit {
       } else {
         this.list.rating = "No reviews"
       }
-      // Create a new Date object and pass the timestamp as an argument
-      const date = new Date(this.list.modified);
-
-      // Use various methods of the Date object to extract different components of the date
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1; // Months are zero-based, so add 1
-      const day = date.getDate();
-      const hours = date.getHours().toString().padStart(2, '0'); // Ensure leading zero
-      const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure leading zero
-      const seconds = date.getSeconds().toString().padStart(2, '0'); // Ensure leading zero
-
       // Format the components using toLocaleString
-      this.formattedDateTime = `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+      this.formattedDateTime = this.timestampToDate(this.list.modified)
+
+
     });
     this.userService.getUserName(this.list.user_id).subscribe(response => {
       this.list.username = response.username
@@ -151,8 +142,23 @@ export class ListItemComponent implements OnInit {
     this.showErrorPopup = false;
   }
 
-  emitDelete(list: any){
+  emitDelete(list: any) {
     this.onClosePopup();
     this.onDeleteList.emit(list);
+  }
+
+  timestampToDate(timestamp: any): string {
+    // Create a new Date object and pass the timestamp as an argument
+    const date = new Date(timestamp);
+    // Use various methods of the Date object to extract different components of the date
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Months are zero-based, so add 1
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0'); // Ensure leading zero
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure leading zero
+    const seconds = date.getSeconds().toString().padStart(2, '0'); // Ensure leading zero
+
+    // Format the components using toLocaleString
+    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
   }
 }
