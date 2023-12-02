@@ -6,4 +6,6 @@ export interface Review {
     comment?: string;
     hidden?: boolean;
     username?: string;
+    created?: number;
+    formattedDateTime?: string;
 }
