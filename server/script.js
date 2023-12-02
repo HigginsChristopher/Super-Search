@@ -129,7 +129,7 @@ const review_list = (review) => {
     id_db.set('highestReviewId', newHighestId)
         .write();
     const timestamp = Date.now();
-    const newReview = { "review_id": newHighestId, "list_id": review.list_id, "user_id": review.user_id, "rating": review.rating, "comment": review.comment, "hidden": false, "created": timestamp};
+    const newReview = { "review_id": newHighestId, "list_id": review.list_id, "user_id": review.user_id, "rating": review.rating, "comment": review.comment, "hidden": false, "created": timestamp };
     review_db.get("reviews").push(newReview).write();
     return newReview;
 }
@@ -400,7 +400,7 @@ const get_list_id = (list_id, user_id) => {
 // Method to get details for given list and user id
 const expand_list = (list_id, user_id = null) => {
     const list1 = list_db.get("lists").find(list => list.list_id === list_id).value();
-    if (list1 === undefined) return new Error(`List has been recently deleted!: ${list_id}`);
+    if (list1 === undefined) return new Error(`List has been recently deleted!:`);
     if (list1.visibility) return list1;
     if (!list1.visibility) return list1.user_id === user_id ? list1 : new Error(`List has been recently set private!`)
 }
