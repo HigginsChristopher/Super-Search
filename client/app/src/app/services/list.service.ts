@@ -29,6 +29,16 @@ export class ListService {
       .set('Content-Type', 'application/json');
   }
 
+  getList(list_id: any): Observable<any> {
+    this.loadToken();
+    const url = `/api/open/lists/${list_id}`;
+    return this.http.get<any>(url, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
+  }
+
   getPrivateLists(): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/`;
@@ -59,9 +69,14 @@ export class ListService {
   }
 
   updateList(list: List): Observable<any> {
+    const newlist = structuredClone(list)
+    delete newlist.rating;
+    delete newlist.username;
+    delete newlist.superheroes;
+    delete newlist.modified;
     this.loadToken();
-    const url = `/api/secure/lists/${list.list_id}`;
-    return this.http.post<any>(url, { list: list }, { headers: this.headers }).pipe(
+    const url = `/api/secure/lists/${newlist.list_id}`;
+    return this.http.post<any>(url, { list: newlist }, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
