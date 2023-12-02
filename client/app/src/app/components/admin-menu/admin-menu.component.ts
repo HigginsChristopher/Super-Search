@@ -28,8 +28,8 @@ export class AdminMenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Admin Menu');
-    this.userService.getAllUserInfo().subscribe(users => {
-      this.users = users
+    this.userService.getAllUserInfo().subscribe(response => {
+      this.users = response.users
     });
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
   }
@@ -39,18 +39,21 @@ export class AdminMenuComponent implements OnInit {
   }
 
   flagUser(user: User) {
-    user.disabled = !user.disabled
-    this.userService.disableUser(user).subscribe();
+    this.userService.disableUser(user).subscribe(response=>{
+      user.disabled = response.user.disabled;
+    });
   }
 
   flagReview(review: Review) {
-    review.hidden = !review.hidden;
-    this.reviewService.flagReview(review.review_id).subscribe()
+    this.reviewService.flagReview(review.review_id).subscribe(response=>{
+      review.hidden = response.review.hidden;
+    });
   }
 
   toggleAdminStatus(user: User): void {
-    user.userType = user.userType === 'admin' ? 'user' : 'admin';
-    this.userService.adminUser(user).subscribe();
+    this.userService.adminUser(user).subscribe(response=>{
+      user.userType = response.user.userType;
+    });
   }
 
   getAdminIcon(user: User): IconDefinition {

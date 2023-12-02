@@ -45,12 +45,13 @@ export class ResetPasswordComponent {
     if (this.resetForm.valid) {
       // Perform password reset logic here
       const newPassword = this.resetForm.value.newPassword;
-      this.userService.updatePassword(newPassword).subscribe(res => console.log(res))
+      this.userService.updatePassword(newPassword).subscribe(response => {
+        this.showPopupWithError(response.message)
+      })
       this.resetForm.reset({
         newPassword: "",
         confirmPassword: ""
       });
-      this.showPopupWithError("Password succesfully changed!")
     } else {
       // Form is not valid, handle accordingly
     }

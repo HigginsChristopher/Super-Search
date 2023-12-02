@@ -36,11 +36,11 @@ export class ListsComponent implements OnInit {
     });
     this.titleService.setTitle('List Manager');
     if (this.currentUser) {
-      this.listService.getPrivateLists().subscribe((lists) => {
-        this.privateLists = lists
+      this.listService.getPrivateLists().subscribe(response => {
+        this.privateLists = response.lists
       });
     }
-    this.listService.getPublicLists().subscribe((lists) => this.publicLists = lists);
+    this.listService.getPublicLists().subscribe(response => this.publicLists = response.lists);
   }
 
   deleteList(list: any) {
@@ -55,20 +55,21 @@ export class ListsComponent implements OnInit {
 
   updateList(list: List) {
     this.listService.updateList(list).subscribe((response: any) => {
-      if (response?.message) {
+      if (response.message) {
         this.showPopupWithError(response.message);
+      } else {
+        this.ngOnInit();
       }
     },
-      (error: any) => {
-        if (error instanceof HttpErrorResponse) {
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
           // Check for specific HTTP error status codes and handle them
-          this.showPopupWithError(error.error);
+          this.showPopupWithError(errorResponse.error.message);
         } else {
           // Handle non-HTTP errors or display a generic error message
           this.showPopupWithError('An unexpected error occurred.');
         }
       });
-    this.ngOnInit();
   }
 
   createReview(review: Review) {
@@ -80,10 +81,10 @@ export class ListsComponent implements OnInit {
           this.ngOnInit();
         }
       },
-      (error: any) => {
-        if (error instanceof HttpErrorResponse) {
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
           // Check for specific HTTP error status codes and handle them
-          this.showPopupWithError(error.error.message);
+          this.showPopupWithError(errorResponse.error.message);
         } else {
           // Handle non-HTTP errors or display a generic error message
           this.showPopupWithError('An unexpected error occurred.');
@@ -101,16 +102,16 @@ export class ListsComponent implements OnInit {
   }
 
   addList(list: any) {
-    this.listService.addList(list).subscribe((res) => {
-      if (res.visibility) {
-        this.publicLists.push(res)
+    this.listService.addList(list).subscribe((response) => {
+      if (response.list.visibility) {
+        this.publicLists.push(response.list)
       }
-      this.privateLists.push(res)
+      this.privateLists.push(response.list)
     },
-      (error: any) => {
-        if (error instanceof HttpErrorResponse) {
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
           // Check for specific HTTP error status codes and handle them
-          this.showPopupWithError(error.error);
+          this.showPopupWithError(errorResponse.error.message);
         } else {
           // Handle non-HTTP errors or display a generic error message
           this.showPopupWithError('An unexpected error occurred.');
@@ -119,4 +120,19 @@ export class ListsComponent implements OnInit {
     );
     this.ngOnInit();
   };
+
+  expandList(list: List){
+    // get the list based on the new superhero id list, if the list doesnt exist (visibility has changed or deleted then bring up message and refresh)
+    this.heroService.displayDetails(list.superhero_ids).subscribe((response) => list.superheroes = response.heroes);
+    this.reviewService.displayReviews(list.list_id).subscribe((response) => {
+      list.reviews = response.reviews;
+      if (list.reviews) {
+        for (let review of list.reviews) {
+          this.userService.getUserName(review.user_id).subscribe(response => {
+            review.username = response.username
+          });
+        }
+      }
+    });
+  }
 }

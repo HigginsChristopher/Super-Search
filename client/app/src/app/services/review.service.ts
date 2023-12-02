@@ -32,9 +32,9 @@ export class ReviewService {
       .set('Content-Type', 'application/json');
   }
 
-  displayReviews(list_id: any): Observable<Review[]> {
+  displayReviews(list_id: any): Observable<any> {
     const url = `/api/open/reviews/${list_id}`;
-    return this.http.get<Review[]>(url, httpOptions).pipe(
+    return this.http.get<any>(url, httpOptions).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
@@ -42,29 +42,33 @@ export class ReviewService {
   }
 
 
-  createReview(review: any): Observable<Review[]> {
+  createReview(review: any): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/reviews/`
-    return this.http.post<Review[]>(url, review, { headers: this.headers }).pipe(
+    return this.http.post<any>(url, {review: review}, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  flagReview(review_id: any): Observable<Review> {
+  flagReview(review_id: any): Observable<any> {
     this.loadToken();
     const url = `/api/admin/reviews/flag/${review_id}`
-    return this.http.post<Review>(url, null, { headers: this.headers }).pipe(
+    return this.http.post<any>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  getReviews(): Observable<Review[]> {
+  getReviews(): Observable<any> {
     this.loadToken();
     const url = `/api/admin/reviews/`
-    return this.http.get<Review[]>(url, { headers: this.headers });
+    return this.http.get<any>(url, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

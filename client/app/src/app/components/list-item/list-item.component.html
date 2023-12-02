@@ -20,7 +20,7 @@
         <div *ngIf="expanded" class="search-results">
             <p>{{"Description: " + list.description}}</p>
             <ul class="list">
-                <li *ngFor="let superhero of superheroes" class="hero-details" (click)="openSuperheroModal(superhero)">
+                <li *ngFor="let superhero of list.superheroes" class="hero-details" (click)="openSuperheroModal(superhero)">
                     <div *ngIf="listType=='private'">
                         {{ "Superhero Name: " +superhero.name+" - Publisher: "+superhero.Publisher}}
                     </div>
@@ -38,9 +38,9 @@
                 <app-superhero-modal *ngIf="selectedSuperhero" [superhero]="selectedSuperhero"
                     (closeModal)="closeSuperheroModal()"></app-superhero-modal>
             </ul>
-            <ul class="list" *ngIf="reviews.length>0">
+            <ul class="list" *ngIf="list.reviews">
                 <h3>Reviews:</h3>
-                <li *ngFor="let review of reviews" class="hero-details">
+                <li *ngFor="let review of list.reviews" class="hero-details">
                     <p>Review by: {{review.username}} - Score {{review.rating}}/5</p>
                     <p>Comment: {{review.comment}}</p>
                 </li>

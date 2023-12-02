@@ -35,13 +35,13 @@ export class HeroSearchComponent implements OnInit {
     const filters = this.searchForm.value;
     this.searched = true;
     this.heroService.matchSearch(filters).subscribe(
-      (heroes) => {
-        this.searchResults = heroes
+      (response) => {
+        this.searchResults = response.match;
       },
-      (error: any) => {
-        if (error instanceof HttpErrorResponse) {
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
           // Check for specific HTTP error status codes and handle them
-          this.showPopupWithError(error.error.message);
+          this.showPopupWithError(errorResponse.error.message);
         } else {
           // Handle non-HTTP errors or display a generic error message
           this.showPopupWithError('An unexpected error occurred.');

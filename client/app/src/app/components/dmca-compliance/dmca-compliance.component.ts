@@ -33,7 +33,7 @@ export class DmcaComplianceComponent implements OnInit {
   ngOnInit(): void {
     this.titleService.setTitle("Copyright Enforcement")
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
-    this.dcmaService.getEntries().subscribe(claims => this.dcmaClaims = claims);
+    this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
     this.dmcaForm = this.fb.group({
       entryAction: ['create', Validators.required],
       existingEntryId: [''],
@@ -44,7 +44,7 @@ export class DmcaComplianceComponent implements OnInit {
       reviewIds: this.fb.control([], Validators.required),
       status: ['Active', Validators.required]
     });
-    this.reviewService.getReviews().subscribe(reviews => this.reviews = reviews)
+    this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
   }
 
   // Implement methods for submitting DMCA entries and managing reviews
@@ -58,8 +58,8 @@ export class DmcaComplianceComponent implements OnInit {
         reviews: this.dmcaForm.value.reviewIds,
         status: this.dmcaForm.value.status
       }
-      this.dcmaService.createEntry(entry).subscribe(dcma => {
-        this.dcmaClaims?.push(dcma)
+      this.dcmaService.createEntry(entry).subscribe(response => {
+        this.dcmaClaims?.push(response.claim)
         this.resetForm();
       });
     } else {
@@ -108,10 +108,11 @@ export class DmcaComplianceComponent implements OnInit {
     })
     for (const review of matchingReviews) {
       if (!review.hidden) {
-        this.reviewService.flagReview(review.review_id).subscribe(resp => console.log(resp))
+        this.reviewService.flagReview(review.review_id).subscribe(response => {
+          review.hidden = response.review.hidden;
+        });
       }
     }
-    this.reviewService.getReviews().subscribe(reviews => this.reviews = reviews)
   }
 
   restoreReviews() {
@@ -124,10 +125,12 @@ export class DmcaComplianceComponent implements OnInit {
     })
     for (const review of matchingReviews) {
       if (review.hidden) {
-        this.reviewService.flagReview(review.review_id).subscribe();
+        this.reviewService.flagReview(review.review_id).subscribe(response => {
+          review.hidden = response.review.hidden;
+        });
       }
     }
-    this.reviewService.getReviews().subscribe(reviews => this.reviews = reviews)
+    this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
   }
 
   onExistingEntrySelected() {
@@ -163,12 +166,11 @@ export class DmcaComplianceComponent implements OnInit {
         status: this.dmcaForm.value.status
       }
       this.dcmaService.updateEntry(entry).subscribe();
-      this.dcmaService.getEntries().subscribe(claims => this.dcmaClaims = claims);
+      this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
     } else {
       this.showPopupWithError(this.getFormValidationErrors());
     }
   }
-
 
   onClosePopup() {
     this.showErrorPopup = false;

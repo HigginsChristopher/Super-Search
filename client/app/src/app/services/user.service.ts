@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { User } from '../user';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, catchError} from 'rxjs';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -30,24 +29,6 @@ export class UserService {
       .set('Content-Type', 'application/json');
   }
 
-  registerUser(user: User): Observable<any> {
-    const url = `/api/open/users/register`;
-    return this.http.post<any>(url, {user: user}, httpOptions).pipe(
-      catchError((error: any) => {
-        return throwError(() => error);
-      })
-    );
-  }
-
-  loginUser(user: any): Observable<any> {
-    const url = `/api/open/users/login`;
-    return this.http.post<any>(url, {user: user}, httpOptions).pipe(
-      catchError((error: any) => {
-        return throwError(() => error);
-      })
-    );
-  }
-
   setUser(user: User | null): void {
     this.userSubject.next(user);
   }
@@ -56,19 +37,49 @@ export class UserService {
     return this.userSubject.asObservable();
   }
 
+  registerUser(user: User): Observable<any> {
+    const url = `/api/open/users/register`;
+    return this.http.post<any>(url, { user: user }, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+  loginUser(user: any): Observable<any> {
+    const url = `/api/open/users/login`;
+    return this.http.post<any>(url, { user: user }, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
+  }
+
   verifyUser(verificationToken: string): Observable<any> {
     const url = `/api/open/users/verify?token=${verificationToken}`
-    return this.http.get<any>(url, httpOptions);
+    return this.http.get<any>(url, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
   getUserName(userId: any): Observable<any> {
     const url = `/api/open/users/${userId}`
-    return this.http.get<any>(url, httpOptions);
+    return this.http.get<any>(url, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
   resendVerification(user: any): Observable<any> {
     const url = `/api/open/users/verify/resend`
-    return this.http.post<any>(url, user, httpOptions);
+    return this.http.post<any>(url, user, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
   getAllUserInfo(): Observable<any> {
@@ -103,12 +114,20 @@ export class UserService {
 
   forgotPassword(user: User): Observable<any> {
     const url = `/api/open/users/recovery`
-    return this.http.post<any>(url, { email: user.email }, httpOptions);
+    return this.http.post<any>(url, { email: user.email }, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
   updatePassword(password: string): Observable<any> {
     this.loadToken();
     const url = `/api/secure/users/password/`
-    return this.http.post<any>(url, { password: password }, { headers: this.headers });
+    return this.http.post<any>(url, { password: password }, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

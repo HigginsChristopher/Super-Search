@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { List } from "../List";
-import { Superhero } from '../superhero';
-import { User } from '../user';
+import { Observable, throwError, catchError } from 'rxjs';
 import { Entry } from '../Entry';
 
 
@@ -31,21 +28,33 @@ export class DcmaService {
       .set('Content-Type', 'application/json');
   }
 
-  getEntries(): Observable<Entry[]> {
+  getEntries(): Observable<any> {
     this.loadToken();
     const url = `/api/admin/dcma/`;
-    return this.http.get<Entry[]>(url, { headers: this.headers })
+    return this.http.get<any>(url, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  createEntry(entry: Entry): Observable<Entry> {
+  createEntry(entry: Entry): Observable<any> {
     this.loadToken();
     const url = `/api/admin/dcma/`;
-    return this.http.post<Entry>(url, { dcma: entry }, { headers: this.headers })
+    return this.http.post<any>(url, { dcma: entry }, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  updateEntry(entry: Entry): Observable<Entry> {
+  updateEntry(entry: Entry): Observable<any> {
     this.loadToken();
     const url = `/api/admin/dcma/${entry.claim_id}`;
-    return this.http.post<Entry>(url, { dcma: entry }, { headers: this.headers })
+    return this.http.post<any>(url, { dcma: entry }, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

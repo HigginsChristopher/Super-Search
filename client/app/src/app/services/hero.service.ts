@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Superhero } from '../superhero';
-import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError, catchError } from 'rxjs';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -15,13 +15,21 @@ export class HeroService {
 
   constructor(private http: HttpClient) { }
 
-  displayDetails(list: any): Observable<Superhero[]> {
+  displayDetails(list: any): Observable<any> {
     const url = `/api/open/superheros_info?id_list=[${list}]`;
-    return this.http.get<Superhero[]>(url, httpOptions);
+    return this.http.get<any>(url, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  matchSearch(filters: any): Observable<Superhero[]> {
+  matchSearch(filters: any): Observable<any> {
     const url = `/api/open/superheros_info/match`;
-    return this.http.post<Superhero[]>(url, { filters: filters }, httpOptions);
+    return this.http.post<any>(url, { filters: filters }, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

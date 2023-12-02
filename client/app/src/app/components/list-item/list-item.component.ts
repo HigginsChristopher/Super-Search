@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@a
 import { List } from "../../List";
 import { faTimes } from "@fortawesome/free-solid-svg-icons"
 import { Superhero } from '../../superhero';
-import { SuperheroService } from '../../services/superhero.service';
 import { ListService } from '../../services/list.service';
 import { User } from '../../user';
 import { UserService } from '../../services/user.service';
@@ -23,6 +22,8 @@ export class ListItemComponent implements OnInit {
   @Output() onDeleteList: EventEmitter<List> = new EventEmitter();
   @Output() onToggleList: EventEmitter<List> = new EventEmitter();
   @Output() onUpdateList: EventEmitter<List> = new EventEmitter();
+  @Output() onExpandList: EventEmitter<List> = new EventEmitter();
+
   @Output() onCreateReview: EventEmitter<Review> = new EventEmitter();
 
 
@@ -39,9 +40,7 @@ export class ListItemComponent implements OnInit {
   errorMessages: string = '';
 
   constructor(
-    private listService: ListService,
     private userService: UserService,
-    private heroService: HeroService,
     private reviewService: ReviewService) { }
 
   @HostListener('mouseup') onMouseUp() {
@@ -67,25 +66,16 @@ export class ListItemComponent implements OnInit {
   }
 
   toggleExpand(list: List): void {
+    this.onExpandList.emit(list);
     this.expanded = !this.expanded;
-    this.heroService.displayDetails(list.superhero_ids).subscribe((superheroes) => this.superheroes = superheroes);
-    this.reviewService.displayReviews(list.list_id).subscribe((reviews) => {
-      this.reviews = reviews;
-      if (this.reviews.length > 0) {
-        for (let review of this.reviews) {
-          this.userService.getUserName(review.user_id).subscribe(response => {
-            review.username = response.username
-          });
-        }
-      }
-    });
   }
 
   ngOnInit(): void {
     this.userService.getCurrentUser().subscribe(user => {
       this.currentUser = user;
     });
-    this.reviewService.displayReviews(this.list.list_id).subscribe((reviews) => {
+    this.reviewService.displayReviews(this.list.list_id).subscribe((response) => {
+      const reviews = response.reviews as Review[];
       if (Array.isArray(reviews)) {
         const totalRatings = reviews.reduce((sum, review) => sum + review.rating, 0);
         this.list.rating = totalRatings / reviews.length;

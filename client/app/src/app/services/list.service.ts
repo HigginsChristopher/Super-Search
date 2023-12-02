@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { List } from "../List";
 import { Superhero } from '../superhero';
 import { User } from '../user';
+import { Observable, throwError, catchError } from 'rxjs';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -29,32 +29,52 @@ export class ListService {
       .set('Content-Type', 'application/json');
   }
 
-  getPrivateLists(): Observable<List[]> {
+  getPrivateLists(): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/`;
-    return this.http.get<List[]>(url, { headers: this.headers })
+    return this.http.get<any>(url, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  getPublicLists(): Observable<List[]> {
+  getPublicLists(): Observable<any> {
     const url = `/api/open/lists/`;
-    return this.http.get<List[]>(url, httpOptions)
+    return this.http.get<any>(url, httpOptions).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  deletePrivateList(list: List): Observable<List> {
+  deletePrivateList(list: List): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/${list.list_id}`;
-    return this.http.delete<List>(url, { headers: this.headers })
+    return this.http.delete<any>(url, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  updateList(list: List): Observable<List> {
+  updateList(list: List): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/${list.list_id}`;
-    return this.http.post<List>(url, list, { headers: this.headers });
+    return this.http.post<any>(url, { list: list }, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 
-  addList(list: List): Observable<List> {
+  addList(list: List): Observable<any> {
     this.loadToken();
     const url = `/api/secure/lists/`;
-    return this.http.post<List>(url, list, { headers: this.headers });
+    return this.http.post<any>(url, { list: list }, { headers: this.headers }).pipe(
+      catchError((error: any) => {
+        return throwError(() => error);
+      })
+    );
   }
 }

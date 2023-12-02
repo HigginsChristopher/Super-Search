@@ -11,6 +11,7 @@
     (onDeleteList)="deleteList(list)"
     (onToggleList)="toggleList(list)"
     (onUpdateList)="updateList($event)" 
+    (onExpandList)="expandList(list)"
     ></app-list-item>
 </div>
 <br>
@@ -21,6 +22,7 @@
     [list]="list"
     [listType]="'public'"
     (onCreateReview)="createReview($event)" 
+    (onExpandList)="expandList(list)"
     ></app-list-item>
 </div>
 

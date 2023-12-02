@@ -52,14 +52,14 @@ export class LoginComponent implements OnInit {
           this.userService.setUser(user as User);
           this.showPopupWithError("Login Successful");
         },
-        (error: any) => {
-          if (error instanceof HttpErrorResponse) {
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
             // Check for specific HTTP error status codes and handle them
             this.currentUser = {
               email: this.loginForm.get('email')?.value,
               password: this.loginForm.get('password')?.value
             }
-            this.showPopupWithError(error.error.message);
+            this.showPopupWithError(errorResponse.error.message);
           } else {
             // Handle non-HTTP errors or display a generic error message
             this.showPopupWithError('An unexpected error occurred.');
