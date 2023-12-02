@@ -30,12 +30,26 @@ const user_adapter = new FileSync("../data/users.json");
 const user_db = low(user_adapter)
 user_db.read();
 user_db.defaults({ users: [] }).write();
+const admin = {
+    id: 0,
+    username: "adminstrator",
+    password: "$2b$10$iyvWWcTnX2ClglFzta0KG.gkCQDBjKFg4ifpKPtu70EM6JLQ13E12",
+    email: "admin@admin.com",
+    verificationToken: "",
+    verified: true,
+    userType: "owner",
+    disabled: false
+}
+const existingAdmin = user_db.get("users").find({ id: 0 }).value();
+if (!existingAdmin) {
+    user_db.get("users").push(admin).write();
+}
 
 // ID database and syncing it with an adapter
 const id_adapter = new FileSync("../data/ids.json");
 const id_db = low(id_adapter)
 id_db.read();
-id_db.defaults({ "highestUserId": -1, "highestListId": -1, "highestReviewId": -1, "highestClaimId": -1 }).write();
+id_db.defaults({ "highestUserId": 0, "highestListId": -1, "highestReviewId": -1, "highestClaimId": -1 }).write();
 
 // Review database and syncing it with an adapter
 const review_adapter = new FileSync("../data/reviews.json");
@@ -114,7 +128,8 @@ const review_list = (review) => {
     const newHighestId = currentHighestId + 1;
     id_db.set('highestReviewId', newHighestId)
         .write();
-    const newReview = { "review_id": newHighestId, "list_id": review.list_id, "user_id": review.user_id, "rating": review.rating, "comment": review.comment, "hidden": false };
+    const timestamp = Date.now();
+    const newReview = { "review_id": newHighestId, "list_id": review.list_id, "user_id": review.user_id, "rating": review.rating, "comment": review.comment, "hidden": false, "created": timestamp};
     review_db.get("reviews").push(newReview).write();
     return newReview;
 }
@@ -382,6 +397,14 @@ const get_list_id = (list_id, user_id) => {
     return list;
 }
 
+// Method to get details for given list and user id
+const expand_list = (list_id, user_id = null) => {
+    const list1 = list_db.get("lists").find(list => list.list_id === list_id).value();
+    if (list1 === undefined) return new Error(`List has been recently deleted!: ${list_id}`);
+    if (list1.visibility) return list1;
+    if (!list1.visibility) return list1.user_id === user_id ? list1 : new Error(`List has been recently set private!`)
+}
+
 // Method to create private lists
 const create_list = (list_object) => {
     const list = get_list_name(list_object["list-name"], list_object.user_id);
@@ -411,13 +434,17 @@ const create_list = (list_object) => {
 
 // Method to save private list 
 const save_list = (list_object) => {
-    const list = get_list_id(list_object.list_id, list_object.user_id);
-    if (!(list instanceof Error)) {
+    const list1 = get_list_id(list_object.list_id, list_object.user_id);
+    const list2 = get_list_name(list_object["list-name"], list_object.user_id);
+    if ((!(list1 instanceof Error) && (list2 instanceof Error)) || list1.value().list_id == list2.value().list_id) {
         const timestamp = Date.now();
-        list.assign({ "user_id": list_object.user_id, "list_id": list_object.list_id, "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp }).write();
+        list1.assign({ "user_id": list_object.user_id, "list_id": list_object.list_id, "list-name": list_object["list-name"], "superhero_ids": list_object.superhero_ids, "description": list_object.description, "visibility": list_object.visibility, "modified": timestamp }).write();
+    }
+    else if (list1 instanceof Error) {
+        return new Error("List with given list-ID doesn't exist!");
     }
     else {
-        return new Error("List with given list-ID doesn't exist!");
+        return new Error("List-name already exists for user!");
     }
 };
 
@@ -564,7 +591,7 @@ const validate_create_review = (review) => {
         list_id: Joi.number().integer().min(0).required(),
         user_id: Joi.number().integer().min(0).required(),
         rating: Joi.number().max(5).min(0).required(),
-        comment: Joi.string().max(2000).min(0),
+        comment: Joi.string().max(2000).allow(null, '').required()
     }
     return Joi.validate(review, schema);
 }
@@ -652,5 +679,6 @@ module.exports = {
     validate_create_dmca,
     validate_update_dcma,
     validate_create_review,
-    validate_create_user
+    validate_create_user,
+    expand_list
 };
