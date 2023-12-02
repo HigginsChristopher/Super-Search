@@ -30,18 +30,18 @@ export class UserService {
       .set('Content-Type', 'application/json');
   }
 
-  registerUser(user: User): Observable<User> {
+  registerUser(user: User): Observable<any> {
     const url = `/api/open/users/register`;
-    return this.http.post<User>(url, user, httpOptions).pipe(
+    return this.http.post<any>(url, {user: user}, httpOptions).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  loginUser(user: any): Observable<User> {
+  loginUser(user: any): Observable<any> {
     const url = `/api/open/users/login`;
-    return this.http.post<User>(url, user, httpOptions).pipe(
+    return this.http.post<any>(url, {user: user}, httpOptions).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
@@ -71,30 +71,30 @@ export class UserService {
     return this.http.post<any>(url, user, httpOptions);
   }
 
-  getAllUserInfo(): Observable<User[]> {
+  getAllUserInfo(): Observable<any> {
     this.loadToken();
     const url = `/api/admin/users`;
-    return this.http.get<User[]>(url, { headers: this.headers }).pipe(
+    return this.http.get<any[]>(url, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  disableUser(user: any): Observable<User> {
+  disableUser(user: any): Observable<any> {
     this.loadToken();
     const url = `/api/admin/users/disable/${user.id}`;
-    return this.http.post<User>(url, null, { headers: this.headers }).pipe(
+    return this.http.post<any>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
     );
   }
 
-  adminUser(user: any): Observable<User> {
+  adminUser(user: any): Observable<any> {
     this.loadToken();
     const url = `/api/owner/users/admin/${user.id}`;
-    return this.http.post<User>(url, null, { headers: this.headers }).pipe(
+    return this.http.post<any>(url, null, { headers: this.headers }).pipe(
       catchError((error: any) => {
         return throwError(() => error);
       })
