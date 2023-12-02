@@ -267,6 +267,8 @@ app.get("/api/open/lists", (req, res) => {
 
 // Endpoint to GET matches for given filters (accessible by all users)
 app.post("/api/open/superheros_info/match", (req, res) => {
+    const { error } = superhero_util.validate_match(req.body.filters);
+    if (error) return res.status(400).send({ message: error.details[0].message });
     match_result = superhero_util.match(req.body.filters);
     res.send({ match: match_result });
 });
