@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "ng serve --proxy-config proxy.conf.json"
   },
   "author": "",
   "license": "ISC",
