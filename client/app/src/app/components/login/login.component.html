@@ -13,7 +13,7 @@
         class="error-message">
         Email is required.
       </div>
-      <div *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched" class="error-message">
+      <div *ngIf="!utilityService.validateEmail(loginForm.get('email')?.value) && loginForm.get('email')?.touched && loginForm.get('email')!.value!==''">
         Please enter a valid email address.
       </div>
     </div>

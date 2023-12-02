@@ -10,7 +10,7 @@
                 *ngIf="createAccountForm.get('email')?.hasError('required') && createAccountForm.get('email')?.touched">
                 Email is required.
             </div>
-            <div *ngIf="!validateEmail(createAccountForm.get('email')?.value) && createAccountForm.get('email')?.touched && createAccountForm.get('email')!.value!==''">
+            <div *ngIf="!utilityService.validateEmail(createAccountForm.get('email')?.value) && createAccountForm.get('email')?.touched && createAccountForm.get('email')!.value!==''">
                 Invalid email format.
             </div>
         </div>

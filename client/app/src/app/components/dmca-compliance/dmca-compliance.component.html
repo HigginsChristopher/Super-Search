@@ -83,7 +83,7 @@
       <div class="form-group">
         <app-button *ngIf="dmcaForm.value.entryAction === 'create'" text="Create DMCA Entry"
           (click)="submitDmcaEntry()"></app-button>
-        <app-button *ngIf="dmcaForm.value.entryAction === 'edit' && dmcaForm.value.existingEntryId != '' "
+        <app-button *ngIf="dmcaForm.value.entryAction === 'edit' && dmcaForm.value.existingEntryId !== ''"
           text="Update DMCA Entry" (click)="updateDmcaEntry()"></app-button>
       </div>
     </form>

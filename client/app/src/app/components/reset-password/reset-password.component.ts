@@ -1,53 +1,72 @@
+// Import Angular core modules and services
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../user';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  styleUrls: ['./reset-password.component.css']
 })
 export class ResetPasswordComponent {
+  // Form group for password reset
   resetForm!: FormGroup;
+
+  // Current user information
   currentUser: User | null = null;
+
+  // Flags for error handling
   showErrorPopup: boolean = false;
   errorMessages: string = '';
 
+  // Constructor with dependency injection
   constructor(
     private fb: FormBuilder,
     private titleService: TitleService,
     private userService: UserService,
   ) { }
 
+  // Lifecycle hook: Called after the component is initialized
   ngOnInit() {
+    // Initialize the form and set the page title
     this.initForm();
     this.titleService.setTitle("Reset-Password");
-    this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
 
+    // Get the current user
+    this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
   }
+
+  // Method to initialize the password reset form
   initForm() {
     this.resetForm = this.fb.group({
       newPassword: ['', [Validators.required]],
       confirmPassword: ['', Validators.required]
     }, {
-      validator: this.passwordMatchValidator // custom validator for password match
+      validator: this.passwordMatchValidator // Custom validator for password match
     });
   }
 
+  // Custom validator function for password match
   passwordMatchValidator(g: FormGroup) {
     return g.get('newPassword')!.value === g.get('confirmPassword')!.value
       ? null : { 'mismatch': true };
   }
+
+  // Method to handle form submission
   onSubmit() {
     if (this.resetForm.valid) {
-      // Perform password reset logic here
+      // Form is valid, perform password reset logic
       const newPassword = this.resetForm.value.newPassword;
+
+      // Call the service to update the password
       this.userService.updatePassword(newPassword).subscribe(response => {
+        // Show a success message in the error popup
         this.showPopupWithError(response.message)
-      })
+      });
+
+      // Reset the form
       this.resetForm.reset({
         newPassword: "",
         confirmPassword: ""
@@ -57,11 +76,13 @@ export class ResetPasswordComponent {
     }
   }
 
-  // Call this function when you want to show the error popup
+  // Method to show the error popup with a message
   showPopupWithError(message: any) {
     this.errorMessages = message;
     this.showErrorPopup = true;
   }
+
+  // Method to close the error popup
   onClosePopup() {
     this.showErrorPopup = false;
   }

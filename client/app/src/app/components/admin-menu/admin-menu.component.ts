@@ -1,4 +1,4 @@
-// admin-menu.component.ts
+// Import Angular core modules and services
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { User } from '../../user';
 import { UserService } from '../../services/user.service';
@@ -15,49 +15,73 @@ import { ReviewService } from '../../services/review.service';
   styleUrls: ['./admin-menu.component.css']
 })
 export class AdminMenuComponent implements OnInit {
+  // Output event emitter for menu item selection
   @Output() menuItemSelected: EventEmitter<string> = new EventEmitter<string>();
+
+  // Current user information
   currentUser: User | null = null;
+
+  // FontAwesome icons for UI elements
   faTimes = faFlag;
   faUserSolid = faUserSolid;
   faUserHollow = faUserHollow;
+
+  // Array of users (or null if not fetched)
   users: User[] | null = null;
+
+  // Flags for error handling in the component
   showErrorPopup: boolean = false;
   errorMessages: string = '';
 
-  constructor(private userService: UserService, private titleService: TitleService, private reviewService: ReviewService) { }
+  // Constructor with dependency injection
+  constructor(
+    private userService: UserService,
+    private titleService: TitleService,
+    private reviewService: ReviewService
+  ) { }
 
+  // Lifecycle hook: Called after the component is initialized
   ngOnInit(): void {
+    // Set the page title for the admin menu
     this.titleService.setTitle('Admin Menu');
+
+    // Fetch all user information
     this.userService.getAllUserInfo().subscribe(response => {
-      this.users = response.users
+      this.users = response.users;
     });
+
+    // Fetch the current user information
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
   }
 
+  // Method to toggle the display of user reviews
   toggleReviews(user: User) {
     user.showReviews = !user.showReviews;
   }
 
+  // Method to flag a user as disabled
   flagUser(user: User) {
-    this.userService.disableUser(user).subscribe(response=>{
+    this.userService.disableUser(user).subscribe(response => {
       user.disabled = response.user.disabled;
     });
   }
 
+  // Method to flag a review
   flagReview(review: Review) {
-    this.reviewService.flagReview(review.review_id).subscribe(response=>{
+    this.reviewService.flagReview(review.review_id).subscribe(response => {
       review.hidden = response.review.hidden;
     });
   }
 
+  // Method to toggle the admin status of a user
   toggleAdminStatus(user: User): void {
-    this.userService.adminUser(user).subscribe(response=>{
+    this.userService.adminUser(user).subscribe(response => {
       user.userType = response.user.userType;
     });
   }
 
+  // Method to get the FontAwesome icon based on the user's admin status
   getAdminIcon(user: User): IconDefinition {
     return user.userType === 'admin' ? faUserSolid : faUserHollow;
   }
-
 }

@@ -1,3 +1,4 @@
+// Import Angular core modules and services,
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TitleService } from '../../services/title.service';
@@ -6,6 +7,7 @@ import { User } from '../../user';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
+import { UtilityService } from '../../services/utility.service';
 
 @Component({
   selector: 'app-create-account',
@@ -13,11 +15,22 @@ import { jwtDecode } from 'jwt-decode';
   styleUrls: ['./create-account.component.css']
 })
 export class CreateAccountComponent implements OnInit {
+  // Reactive form for user account creation
   createAccountForm: FormGroup;
+
+  // Flag to track if user registration is successful
   registrationSuccess = false;
+
+  // User object created after successful registration
   createdUser: User | null = null;
+
+  // URL for email verification link
   verifyUrl = "";
+
+  // Flag to control visibility of error popup
   showErrorPopup: boolean = false;
+
+  // Array to store error messages
   errorMessages: any = [];
 
   // Call this function when you want to show the error popup
@@ -26,12 +39,15 @@ export class CreateAccountComponent implements OnInit {
     this.showErrorPopup = true;
   }
 
+  // Constructor with dependency injection
   constructor(
     private formBuilder: FormBuilder,
     private userService: UserService,
     private titleService: TitleService,
-    private router: Router
+    private router: Router,
+    public utilityService: UtilityService
   ) {
+    // Initialize the form with email, password, and nickname fields
     this.createAccountForm = this.formBuilder.group({
       email: ['', [Validators.required]],
       password: ['', [Validators.required]],
@@ -39,14 +55,9 @@ export class CreateAccountComponent implements OnInit {
     });
   }
 
-  validateEmail(email: string): boolean {
-    const regexp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-    const serchfind = regexp.test(email);
-    return serchfind
-  }
-
+  // Handle form submission
   onSubmit() {
-    if (this.createAccountForm.valid && this.validateEmail(this.createAccountForm.get('email')?.value)) {
+    if (this.createAccountForm.valid && this.utilityService.validateEmail(this.createAccountForm.get('email')?.value)) {
       const email = this.createAccountForm.get('email')?.value;
       const password = this.createAccountForm.get('password')?.value;
       const nickname = this.createAccountForm.get('nickname')?.value;
@@ -56,25 +67,25 @@ export class CreateAccountComponent implements OnInit {
         email: email,
       };
       this.userService.registerUser(newUser).subscribe(
+        // Handle successful registration
         (response) => {
           this.createdUser = response.user;
           this.registrationSuccess = true;
           this.createMockEmail();
         },
+        // Handle registration error
         (errorResponse: any) => {
           if (errorResponse instanceof HttpErrorResponse) {
-            // Check for specific HTTP error status codes and handle them
             this.showPopupWithError(errorResponse.error.message);
           } else {
-            // Handle non-HTTP errors or display a generic error message
             this.showPopupWithError('An unexpected error occurred.');
           }
         }
       );
-    }
-    else {
+    } else {
       this.errorMessages = [];
-      if (!this.validateEmail(this.createAccountForm.get('email')?.value) && this.createAccountForm.get("email")!.value !== "") {
+      // Check for invalid email format
+      if (!this.utilityService.validateEmail(this.createAccountForm.get('email')?.value) && this.createAccountForm.get("email")!.value !== "") {
         this.errorMessages.push("Invalid email format")
       }
       this.showErrorPopup = true;
@@ -83,17 +94,20 @@ export class CreateAccountComponent implements OnInit {
     }
   };
 
+  // Close the error popup
   onClosePopup() {
-    if(this.errorMessages==="Email Verification Successful"){
+    if (this.errorMessages === "Email Verification Successful") {
       this.router.navigate(['/'])
     }
     this.showErrorPopup = false;
   }
 
   ngOnInit(): void {
+    // Set the page title
     this.titleService.setTitle('Create Account');
   }
 
+  // Create a mock email with a verification link
   createMockEmail(): void {
     const protocol = window.location.protocol;
     const host = window.location.host;
@@ -102,6 +116,7 @@ export class CreateAccountComponent implements OnInit {
     this.verifyUrl = url;
   }
 
+  // Handle user verification
   onVerify() {
     this.userService.verifyUser(this.createdUser!.verificationToken!).subscribe(response => {
       localStorage.setItem('token', JSON.stringify(response.token));
@@ -112,6 +127,7 @@ export class CreateAccountComponent implements OnInit {
     });
   }
 
+  // Get form validation errors and display corresponding messages
   getFormValidationErrors() {
     const errorMapping: { [key: string]: string } = {
       required: 'is required'
@@ -128,4 +144,3 @@ export class CreateAccountComponent implements OnInit {
     });
   }
 }
-

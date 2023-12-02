@@ -1,4 +1,4 @@
-// dmca-compliance.component.ts
+// Import Angular core modules and services
 import { Component, OnInit } from '@angular/core';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
@@ -8,6 +8,7 @@ import { DcmaService } from '../../services/dcma.service';
 import { Entry } from '../../Entry';
 import { ReviewService } from '../../services/review.service';
 import { Review } from '../../Review';
+import { UtilityService } from '../../services/utility.service';
 
 @Component({
   selector: 'app-dmca-compliance',
@@ -15,25 +16,42 @@ import { Review } from '../../Review';
   styleUrls: ['./dmca-compliance.component.css']
 })
 export class DmcaComplianceComponent implements OnInit {
+  // Current user information
   currentUser: User | null = null;
+
+  // Form group for DMCA compliance
   dmcaForm!: FormGroup;
+
+  // Lists of reviews and DCMA claims
   reviews: Review[] | null = null;
   dcmaClaims: Entry[] | null = null;
+
+  // Flags for error handling in the form
   showErrorPopup: boolean = false;
   errorMessages: string = '';
 
+  // Constructor with dependency injection
   constructor(
     private titleService: TitleService,
     private userService: UserService,
     private fb: FormBuilder,
     private dcmaService: DcmaService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private utilityService: UtilityService
   ) { }
 
+  // Lifecycle hook: Called after the component is initialized
   ngOnInit(): void {
+    // Set page title
     this.titleService.setTitle("Copyright Enforcement")
+
+    // Fetch current user information
     this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
+
+    // Fetch DCMA entries
     this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
+
+    // Initialize the DMCA form with validation
     this.dmcaForm = this.fb.group({
       entryAction: ['create', Validators.required],
       existingEntryId: [''],
@@ -44,12 +62,15 @@ export class DmcaComplianceComponent implements OnInit {
       reviewIds: this.fb.control([], Validators.required),
       status: ['Active', Validators.required]
     });
+
+    // Fetch reviews
     this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
   }
 
-  // Implement methods for submitting DMCA entries and managing reviews
+  // Method to submit DMCA entry
   submitDmcaEntry() {
     if (this.dmcaForm.valid) {
+      // Create new DMCA entry
       const entry = {
         date_recieved: this.dmcaForm.value.dateReceived,
         date_notice_sent: this.dmcaForm.value.dateNoticeSent,
@@ -58,18 +79,26 @@ export class DmcaComplianceComponent implements OnInit {
         reviews: this.dmcaForm.value.reviewIds,
         status: this.dmcaForm.value.status
       }
+
+      // Subscribe to the DMCA service for creating an entry
       this.dcmaService.createEntry(entry).subscribe(response => {
+        // Update the claims list and reset the form
         this.dcmaClaims?.push(response.claim)
         this.resetForm();
       });
     } else {
-      this.showPopupWithError(this.getFormValidationErrors());
+      // Show error popup and display form validation errors
+      this.showPopupWithError(this.utilityService.getFormValidationErrors(this.dmcaForm));
     }
   }
 
+  // Method to reset the DMCA form
   resetForm() {
+    // Reset the form based on the entry action
     if (this.dmcaForm.value.entryAction == "edit") {
+      // Reset for editing an existing entry
       this.dmcaForm.reset({
+        // Reset form values with data from the selected claim
         entryAction: this.dmcaForm.value.entryAction,
         existingEntryId: this.dcmaClaims![0].claim_id,
         dateReceived: this.dcmaClaims![0].date_notice_sent,
@@ -80,6 +109,7 @@ export class DmcaComplianceComponent implements OnInit {
         status: this.dcmaClaims![0].status,
       });
     } else {
+      // Reset for creating a new entry
       this.dmcaForm.reset({
         entryAction: this.dmcaForm.value.entryAction,
         existingEntryId: '',
@@ -93,19 +123,26 @@ export class DmcaComplianceComponent implements OnInit {
     }
   }
 
+  // Method to check if a form field is invalid
   isFieldInvalid(field: string): boolean | undefined {
     const control = this.dmcaForm.get(field);
     return control?.touched && control?.hasError('required');
   }
 
+  // Method to hide reviews based on the selected IDs
   hideReviews() {
+    // Fetch review IDs from the form
     const review_ids = this.dmcaForm.value.reviewIds;
+
+    // Find matching reviews
     let matchingReviews: Review[] = [];
     this.reviews!.forEach(review => {
       if (review_ids.includes(review.review_id)) {
         matchingReviews.push(review);
       }
     })
+
+    // Hide matching reviews
     for (const review of matchingReviews) {
       if (!review.hidden) {
         this.reviewService.flagReview(review.review_id).subscribe(response => {
@@ -115,14 +152,20 @@ export class DmcaComplianceComponent implements OnInit {
     }
   }
 
+  // Method to restore hidden reviews
   restoreReviews() {
+    // Fetch review IDs from the form
     const review_ids = this.dmcaForm.value.reviewIds;
+
+    // Find matching reviews
     let matchingReviews: Review[] = [];
     this.reviews!.forEach(review => {
       if (review_ids.includes(review.review_id)) {
         matchingReviews.push(review);
       }
     })
+
+    // Restore hidden reviews
     for (const review of matchingReviews) {
       if (review.hidden) {
         this.reviewService.flagReview(review.review_id).subscribe(response => {
@@ -130,19 +173,21 @@ export class DmcaComplianceComponent implements OnInit {
         });
       }
     }
+
+    // Fetch updated reviews
     this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
   }
 
+  // Method called when an existing entry is selected
   onExistingEntrySelected() {
     const selectedEntryId = this.dmcaForm.value.existingEntryId;
 
-    // Call your service method to get the details of the selected entry
     if (selectedEntryId) {
-
+      // Find the selected entry
       const selectedEntry = this.dcmaClaims!.find(entry => entry.claim_id == selectedEntryId);
 
-      // If the selected entry is found, populate the form fields
       if (selectedEntry) {
+        // Patch form values with data from the selected claim
         this.dmcaForm.patchValue({
           dateReceived: selectedEntry.date_recieved,
           dateNoticeSent: selectedEntry.date_notice_sent,
@@ -154,8 +199,11 @@ export class DmcaComplianceComponent implements OnInit {
       }
     }
   }
+
+  // Method to update an existing DMCA entry
   updateDmcaEntry() {
     if (this.dmcaForm.valid) {
+      // Create entry object for updating
       const entry = {
         claim_id: this.dmcaForm.value.existingEntryId,
         date_recieved: this.dmcaForm.value.dateReceived,
@@ -165,37 +213,26 @@ export class DmcaComplianceComponent implements OnInit {
         reviews: this.dmcaForm.value.reviewIds,
         status: this.dmcaForm.value.status
       }
+
+      // Subscribe to the DMCA service for updating an entry
       this.dcmaService.updateEntry(entry).subscribe();
+
+      // Fetch updated DCMA entries
       this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
     } else {
-      this.showPopupWithError(this.getFormValidationErrors());
+      // Show error popup and display form validation errors
+      this.showPopupWithError(this.utilityService.getFormValidationErrors(this.dmcaForm));
     }
   }
 
+  // Method to close the error popup
   onClosePopup() {
     this.showErrorPopup = false;
   }
 
+  // Method to show the error popup with a specific message
   showPopupWithError(message: any) {
     this.errorMessages = message;
     this.showErrorPopup = true;
-  }
-
-  getFormValidationErrors(): string[] {
-    const errorMessages: string[] = [];
-    const errorMapping: { [key: string]: string } = {
-      required: 'is required'
-    };
-
-    Object.keys(this.dmcaForm.controls).forEach(key => {
-      const controlErrors = this.dmcaForm.get(key)!.errors;
-      if (controlErrors != null) {
-        Object.keys(controlErrors).forEach(keyError => {
-          const message = `${key.charAt(0).toUpperCase() + key.slice(1)} ${errorMapping[keyError as keyof typeof errorMapping]}`;
-          errorMessages.push(message);
-        });
-      }
-    });
-    return errorMessages;
   }
 }
