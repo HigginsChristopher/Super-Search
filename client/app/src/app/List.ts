@@ -1,5 +1,5 @@
 import { Review } from "./Review";
-import { Superhero } from "./superhero";
+import { Superhero } from "./Superhero";
 
 export interface List {
     user_id: number;
