@@ -25,7 +25,7 @@
           <a class="resend-link" (click)="onVerify()">{{verifyUrl}}</a>
         </div>
       </div>
-      <div *ngIf="errorMessage=='Wrong password.'">
+      <div *ngIf="errorMessage=='Login was unsuccessful.'">
         <p>Forgot password? <a class="resend-link" (click)="onForgot()">Send recovery email</a></p>
         <div *ngIf="forgotSuccess" class="smallText">
           <br>
