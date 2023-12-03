@@ -8,7 +8,7 @@
             <a routerLink="/dmca-compliance">Our Policies</a>
         </div>
         <app-button class="admin-button"
-            *ngIf=" ((currentUser?.userType==='admin' || currentUser?.userType==='owner')) && !hasRoute('/login')" text="Admin"
+            *ngIf=" ((currentUser?.userType==='admin' || currentUser?.userType==='owner')) && !hasRoute('/login') && !hasRoute('/admin-menu')" text="Admin"
             (btnClick)="routeAdminMenu()">
         </app-button>
     </div>
