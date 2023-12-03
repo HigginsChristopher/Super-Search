@@ -52,14 +52,35 @@ export class ListsComponent implements OnInit {
     if (this.currentUser) {
       this.listService.getPrivateLists().subscribe(response => {
         this.privateLists = response.lists;
-      });
+      },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            this.showPopupWithError(errorResponse.error.message);
+          } else {
+            this.showPopupWithError('An unexpected error occurred.');
+          }
+        });
     }
-    this.listService.getPublicLists().subscribe(response => this.publicLists = response.lists);
+    this.listService.getPublicLists().subscribe(response => { this.publicLists = response.lists },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          this.showPopupWithError(errorResponse.error.message);
+        } else {
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      });
   }
 
   // Method to delete a private list
   deleteList(list: any) {
-    this.listService.deletePrivateList(list).subscribe(() => this.privateLists = this.privateLists.filter(l => l.list_id !== list.list_id));
+    this.listService.deletePrivateList(list).subscribe(() => { this.privateLists = this.privateLists.filter(l => l.list_id !== list.list_id) },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          this.showPopupWithError(errorResponse.error.message);
+        } else {
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      });
     this.ngOnInit();
   }
 
@@ -169,25 +190,41 @@ export class ListsComponent implements OnInit {
                       (usernameResponse) => {
                         review.username = usernameResponse.username;
                       },
-                      (error) => {
-                        console.error("Error fetching username:", error);
+                      (errorResponse: any) => {
+                        if (errorResponse instanceof HttpErrorResponse) {
+                          this.showPopupWithError(errorResponse.error.message);
+                        } else {
+                          this.showPopupWithError('An unexpected error occurred.');
+                        }
                       }
                     );
                   }
                 }
               },
-              (error) => {
-                console.error("Error fetching reviews:", error);
+              (errorResponse: any) => {
+                if (errorResponse instanceof HttpErrorResponse) {
+                  this.showPopupWithError(errorResponse.error.message);
+                } else {
+                  this.showPopupWithError('An unexpected error occurred.');
+                }
               }
             );
           },
-          (error) => {
-            console.error("Error fetching superhero details:", error);
+          (errorResponse: any) => {
+            if (errorResponse instanceof HttpErrorResponse) {
+              this.showPopupWithError(errorResponse.error.message);
+            } else {
+              this.showPopupWithError('An unexpected error occurred.');
+            }
           }
         );
       },
-      (error) => {
-        this.showPopupWithError(error.error.message);
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          this.showPopupWithError(errorResponse.error.message);
+        } else {
+          this.showPopupWithError('An unexpected error occurred.');
+        }
         this.ngOnInit();
       }
     );

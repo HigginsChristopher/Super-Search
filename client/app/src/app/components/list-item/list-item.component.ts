@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { ReviewService } from '../../services/review.service';
 import { Review } from '../../Review';
 import { UtilityService } from '../../services/utility.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-list-item',
@@ -111,12 +112,26 @@ export class ListItemComponent implements OnInit {
 
       // Format the date and time
       this.formattedDateTime = this.utilityService.timestampToDate(this.list.modified);
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          this.showPopupWithError(errorResponse.error.message);
+        } else {
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      });
 
     // Get the username for the list owner
     this.userService.getUserName(this.list.user_id).subscribe(response => {
       this.list.username = response.username;
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      });
   }
 
   // Method to handle the delete action

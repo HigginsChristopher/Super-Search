@@ -4,6 +4,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons"
 import { UserService } from '../../services/user.service';
 import { User } from '../../user';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 
 @Component({
@@ -71,7 +72,14 @@ export class ErrorPopupComponent implements OnInit {
       this.currentUser = response.user;
       this.registrationSuccess = true;
       this.createMockEmail();
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      });
   }
 
   // Method to handle user verification
@@ -82,7 +90,14 @@ export class ErrorPopupComponent implements OnInit {
       localStorage.setItem('userData', JSON.stringify(user));
       this.userService.setUser(user as User);
       this.router.navigate(['/']);
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      });
   }
 
   // Method to handle forgot password
@@ -103,7 +118,14 @@ export class ErrorPopupComponent implements OnInit {
       localStorage.setItem('userData', JSON.stringify(user));
       this.userService.setUser(user as User);
       this.router.navigate(['/reset-password']);
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      });
   }
 
   // Method triggered when the delete list button is clicked

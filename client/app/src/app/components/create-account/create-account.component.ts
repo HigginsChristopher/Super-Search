@@ -124,7 +124,14 @@ export class CreateAccountComponent implements OnInit {
       localStorage.setItem('userData', JSON.stringify(user));
       this.userService.setUser(user as User);
       this.showPopupWithError("Email Verification Successful");
-    });
+    },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      });
   }
 
   // Get form validation errors and display corresponding messages

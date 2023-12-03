@@ -1,9 +1,10 @@
 // Import Angular core modules and services
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../user';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-reset-password',
@@ -64,7 +65,14 @@ export class ResetPasswordComponent {
       this.userService.updatePassword(newPassword).subscribe(response => {
         // Show a success message in the error popup
         this.showPopupWithError(response.message)
-      });
+      },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        });
 
       // Reset the form
       this.resetForm.reset({

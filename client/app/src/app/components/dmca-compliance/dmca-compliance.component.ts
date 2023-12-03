@@ -9,6 +9,7 @@ import { Entry } from '../../Entry';
 import { ReviewService } from '../../services/review.service';
 import { Review } from '../../Review';
 import { UtilityService } from '../../services/utility.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-dmca-compliance',
@@ -44,13 +45,29 @@ export class DmcaComplianceComponent implements OnInit {
   ngOnInit(): void {
     // Set page title
     this.titleService.setTitle("Copyright Enforcement")
+    if (this.currentUser?.userType == "owner" || this.currentUser?.userType == "admin") {
+      // Fetch current user information
+      this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
 
-    // Fetch current user information
-    this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
-
-    // Fetch DCMA entries
-    this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
-
+      // Fetch DCMA entries
+      this.dcmaService.getEntries().subscribe(response => { this.dcmaClaims = response.claims },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        });
+      // Fetch reviews
+      this.reviewService.getReviews().subscribe(response => { this.reviews = response.reviews },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        })
+    }
     // Initialize the DMCA form with validation
     this.dmcaForm = this.fb.group({
       entryAction: ['create', Validators.required],
@@ -63,8 +80,6 @@ export class DmcaComplianceComponent implements OnInit {
       status: ['Active', Validators.required]
     });
 
-    // Fetch reviews
-    this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
   }
 
   // Method to submit DMCA entry
@@ -85,7 +100,14 @@ export class DmcaComplianceComponent implements OnInit {
         // Update the claims list and reset the form
         this.dcmaClaims?.push(response.claim)
         this.resetForm();
-      });
+      },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        });
     } else {
       // Show error popup and display form validation errors
       this.showPopupWithError(this.utilityService.getFormValidationErrors(this.dmcaForm));
@@ -147,7 +169,14 @@ export class DmcaComplianceComponent implements OnInit {
       if (!review.hidden) {
         this.reviewService.flagReview(review.review_id).subscribe(response => {
           review.hidden = response.review.hidden;
-        });
+        },
+          (errorResponse: any) => {
+            if (errorResponse instanceof HttpErrorResponse) {
+              console.error(errorResponse.error.message);
+            } else {
+              console.error('An unexpected error occurred.');
+            }
+          });
       }
     }
   }
@@ -170,12 +199,26 @@ export class DmcaComplianceComponent implements OnInit {
       if (review.hidden) {
         this.reviewService.flagReview(review.review_id).subscribe(response => {
           review.hidden = response.review.hidden;
-        });
+        },
+          (errorResponse: any) => {
+            if (errorResponse instanceof HttpErrorResponse) {
+              console.error(errorResponse.error.message);
+            } else {
+              console.error('An unexpected error occurred.');
+            }
+          });
       }
     }
 
     // Fetch updated reviews
-    this.reviewService.getReviews().subscribe(response => this.reviews = response.reviews)
+    this.reviewService.getReviews().subscribe(response => { this.reviews = response.reviews },
+      (errorResponse: any) => {
+        if (errorResponse instanceof HttpErrorResponse) {
+          console.error(errorResponse.error.message);
+        } else {
+          console.error('An unexpected error occurred.');
+        }
+      })
   }
 
   // Method called when an existing entry is selected
@@ -215,10 +258,24 @@ export class DmcaComplianceComponent implements OnInit {
       }
 
       // Subscribe to the DMCA service for updating an entry
-      this.dcmaService.updateEntry(entry).subscribe();
+      this.dcmaService.updateEntry(entry).subscribe(() => { },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        });
 
       // Fetch updated DCMA entries
-      this.dcmaService.getEntries().subscribe(response => this.dcmaClaims = response.claims);
+      this.dcmaService.getEntries().subscribe(response => { this.dcmaClaims = response.claims },
+        (errorResponse: any) => {
+          if (errorResponse instanceof HttpErrorResponse) {
+            console.error(errorResponse.error.message);
+          } else {
+            console.error('An unexpected error occurred.');
+          }
+        });
     } else {
       // Show error popup and display form validation errors
       this.showPopupWithError(this.utilityService.getFormValidationErrors(this.dmcaForm));
