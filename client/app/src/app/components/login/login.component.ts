@@ -5,7 +5,7 @@ import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { User } from '../../user';
+import { User } from '../../User';
 import { jwtDecode } from 'jwt-decode';
 import { UtilityService } from '../../services/utility.service';
 

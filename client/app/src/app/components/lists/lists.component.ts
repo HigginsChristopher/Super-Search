@@ -4,7 +4,7 @@ import { ListService } from "../../services/list.service"
 import { List } from "../../List";
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
-import { User } from '../../user';
+import { User } from '../../User';
 import { HttpErrorResponse } from '@angular/common/http';
 import { HeroService } from '../../services/hero.service';
 import { ReviewService } from '../../services/review.service';

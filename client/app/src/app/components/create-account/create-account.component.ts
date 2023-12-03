@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
-import { User } from '../../user';
+import { User } from '../../User';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';

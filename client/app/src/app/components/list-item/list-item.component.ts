@@ -2,8 +2,8 @@
 import { Component, Input, Output, EventEmitter, OnInit, HostListener } from '@angular/core';
 import { List } from "../../List";
 import { faTimes } from "@fortawesome/free-solid-svg-icons"
-import { Superhero } from '../../superhero';
-import { User } from '../../user';
+import { Superhero } from '../../Superhero';
+import { User } from '../../User';
 import { UserService } from '../../services/user.service';
 import { ReviewService } from '../../services/review.service';
 import { Review } from '../../Review';

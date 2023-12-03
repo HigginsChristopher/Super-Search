@@ -2,7 +2,7 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
-import { User } from '../../user';
+import { User } from '../../User';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DcmaService } from '../../services/dcma.service';
 import { Entry } from '../../Entry';

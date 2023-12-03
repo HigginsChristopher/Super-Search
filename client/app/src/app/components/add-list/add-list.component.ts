@@ -5,7 +5,7 @@ import { List } from '../../List';
 import { UiService } from '../../services/ui.service';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { UserService } from '../../services/user.service';
-import { User } from '../../user';
+import { User } from '../../User';
 import { UtilityService } from '../../services/utility.service';
 
 @Component({

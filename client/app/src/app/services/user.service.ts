@@ -1,7 +1,7 @@
 // Importing necessary modules and classes from Angular and third-party libraries
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { User } from '../user';
+import { User } from '../User';
 import { BehaviorSubject, Observable, throwError, catchError } from 'rxjs';
 
 // HTTP options for setting content type

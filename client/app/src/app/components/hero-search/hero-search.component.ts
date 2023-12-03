@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TitleService } from '../../services/title.service';
 import { HeroService } from '../../services/hero.service';
-import { Superhero } from '../../superhero';
+import { Superhero } from '../../Superhero';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 

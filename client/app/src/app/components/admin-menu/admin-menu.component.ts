@@ -1,6 +1,6 @@
 // Import Angular core modules and services
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
-import { User } from '../../user';
+import { User } from '../../User';
 import { UserService } from '../../services/user.service';
 import { TitleService } from '../../services/title.service';
 import { IconDefinition, faFlag } from "@fortawesome/free-solid-svg-icons";

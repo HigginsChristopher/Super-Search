@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { faTimes } from "@fortawesome/free-solid-svg-icons"
 import { UserService } from '../../services/user.service';
-import { User } from '../../user';
+import { User } from '../../User';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';

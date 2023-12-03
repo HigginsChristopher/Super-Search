@@ -1,7 +1,7 @@
 // Import Angular core modules and libraries
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Superhero } from '../../superhero';
+import { Superhero } from '../../Superhero';
 
 @Component({
   selector: 'app-superhero-modal',
