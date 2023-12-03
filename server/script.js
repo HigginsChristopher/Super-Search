@@ -197,10 +197,10 @@ const reset_password = async (user_id, password) => {
 // Function to login user
 const login_user = async (user) => {
     const email = user_db.get("users").find({ "email": user.email }).value();
-    if (email === undefined) return new Error(`No users for given email.`)
+    if (email === undefined) return new Error(`Login was unsuccessful.`)
     const approve = await comparePasswords(user.password, email.password)
     if (email.disabled) return new Error(`Account disabled! Contact a site adminstrator.`)
-    if (!approve) return new Error(`Wrong password.`)
+    if (!approve) return new Error(`Login was unsuccessful.`)
     if (!email.verified) return new Error(`Account not verified! Check your email for verification email.`)
     return email;
 }
@@ -362,8 +362,10 @@ const match = (filters) => {
         keys: ['name', "Race", ['powers'], 'Publisher'],
         includeScore: true,
         findAllMatches: true,
+        threshold: 0.3, 
+        distance: 10, 
+        ignoreFieldNorm: true
     };
-
     const fuse = new Fuse(heroes, options);
     const results = fuse.search(nonEmptyFilters);
     const limitedResults = results.slice(0, limit);
