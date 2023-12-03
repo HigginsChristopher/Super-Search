@@ -37,7 +37,11 @@ const appRoutes: Routes = [
     component: AdminMenuComponent,
     canActivate: [IsAdminGuard]
   },
-  { path: "reset-password", component: ResetPasswordComponent },
+  {
+    path: "reset-password",
+    component: ResetPasswordComponent,
+    canActivate: [IsUserGuard]
+  },
   {
     path: "account",
     component: AccountComponent,
