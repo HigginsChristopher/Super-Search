@@ -400,7 +400,7 @@ const get_list_id = (list_id, user_id) => {
 // Method to get details for given list and user id
 const expand_list = (list_id, user_id = null) => {
     const list1 = list_db.get("lists").find(list => list.list_id === list_id).value();
-    if (list1 === undefined) return new Error(`List has been recently deleted!:`);
+    if (list1 === undefined) return new Error(`List has been recently deleted!`);
     if (list1.visibility) return list1;
     if (!list1.visibility) return list1.user_id === user_id ? list1 : new Error(`List has been recently set private!`)
 }
