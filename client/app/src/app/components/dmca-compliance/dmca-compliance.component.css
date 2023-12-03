@@ -49,23 +49,21 @@ select {
     height: 36px;
 }
 
-#reviewIds{
-    max-height: 300px; 
+#reviewIds {
+    max-height: 300px;
     overflow-y: auto;
     height: 150px;
-    
+
 }
 
-/* Style for the lines between options */
 #reviewIds option {
     border-bottom: 1px solid #ccc;
-    padding: 5px; /* Optional: Add some padding to make it visually appealing */
-  }
-  
-  /* Style for the last option to remove the bottom border */
-  #reviewIds option:last-child {
+    padding: 5px;
+}
+
+#reviewIds option:last-child {
     border-bottom: none;
-  }
+}
 
 
 button:hover {
@@ -76,4 +74,19 @@ button:hover {
     resize: none;
     width: 100%;
     overflow-y: hidden;
+}
+
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.file-input {
+    width: 55%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }

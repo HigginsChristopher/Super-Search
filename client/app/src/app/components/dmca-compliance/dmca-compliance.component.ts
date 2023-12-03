@@ -1,5 +1,5 @@
 // Import Angular core modules and services
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { TitleService } from '../../services/title.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../user';
@@ -10,6 +10,8 @@ import { ReviewService } from '../../services/review.service';
 import { Review } from '../../Review';
 import { UtilityService } from '../../services/utility.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FileService } from '../../services/file.service';
+import { ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-dmca-compliance',
@@ -17,6 +19,17 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./dmca-compliance.component.css']
 })
 export class DmcaComplianceComponent implements OnInit {
+  // Array to store selected files, initialized with null values
+  files: any[] | null = [null, null, null]
+
+  // ViewChild decorators to get references to input elements in the template
+  @ViewChild('myInput0')
+  myInputVariable0!: ElementRef;
+  @ViewChild('myInput1')
+  myInputVariable1!: ElementRef;
+  @ViewChild('myInput2')
+  myInputVariable2!: ElementRef;
+
   // Current user information
   currentUser: User | null = null;
 
@@ -38,11 +51,14 @@ export class DmcaComplianceComponent implements OnInit {
     private fb: FormBuilder,
     private dcmaService: DcmaService,
     private reviewService: ReviewService,
-    private utilityService: UtilityService
+    private utilityService: UtilityService,
+    private fileService: FileService,
   ) { }
 
   // Lifecycle hook: Called after the component is initialized
   ngOnInit(): void {
+    // Fetch current user information
+    this.userService.getCurrentUser().subscribe(user => this.currentUser = user);
     // Set page title
     this.titleService.setTitle("Copyright Enforcement")
     if (this.currentUser?.userType == "owner" || this.currentUser?.userType == "admin") {
@@ -292,4 +308,44 @@ export class DmcaComplianceComponent implements OnInit {
     this.errorMessages = message;
     this.showErrorPopup = true;
   }
+
+  // Method to upload a file based on its position and policy type
+  uploadFile(position: number, policyType: string): void {
+    // Check the position to determine which input variable to reset
+    if (position == 0) {
+      this.myInputVariable0.nativeElement.value = "";
+    } else if (position == 1) {
+      this.myInputVariable1.nativeElement.value = "";
+    } else {
+      this.myInputVariable2.nativeElement.value = "";
+    }
+    // Get the file from the files array based on the position
+    const file = this.files![position];
+    // Create a FormData object and append the file and policyType
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('policyType', policyType);
+    // Call the fileService to upload the file and handle the response
+    this.fileService.uploadFile(formData).subscribe(
+      // Success callback
+      response => { this.showPopupWithError(response.message) },
+      // Error callback
+      (errorResponse: any) => {
+        // Check if the error response is an HttpErrorResponse
+        if (errorResponse instanceof HttpErrorResponse) {
+          this.showPopupWithError(errorResponse.error.message);
+        } else {
+          // Handle unexpected errors
+          this.showPopupWithError('An unexpected error occurred.');
+        }
+      }
+    );
+  }
+
+  // Method called when a file is selected
+  onFileSelected(event: any, position: number): void {
+    // Store the selected file in the files array at the specified position
+    this.files![position] = event.target.files[0];
+  }
+
 }

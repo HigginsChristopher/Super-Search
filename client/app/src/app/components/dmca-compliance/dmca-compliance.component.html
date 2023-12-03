@@ -1,13 +1,24 @@
 <div>
   <app-error-popup *ngIf="showErrorPopup" [errorMessage]="errorMessages"
-  (closePopup)="onClosePopup()"></app-error-popup>
+    (closePopup)="onClosePopup()"></app-error-popup>
   <h3>Security and Privacy Policy</h3>
   <p>HTML: <a href="./assets/Security-and-Privacy-Policy.html" target="_blank">Security and Privacy Policy</a></p>
+  <div *ngIf="currentUser?.userType=='admin'||currentUser?.userType=='owner'" class="file-upload-container">
+    <input #myInput0 type="file" placeholder="Select File" (change)="onFileSelected($event,0)" class="file-input" />
+    <app-button text="Upload" (click)="uploadFile(0,'s&p')"></app-button>
+  </div>
   <h3>Acceptable Use Policy (AUP)</h3>
   <p>HTML: <a href="./assets/Acceptable-Use-Policy.html" target="_blank">Acceptable Use Policy (AUP)</a></p>
-
+  <div *ngIf="currentUser?.userType=='admin'||currentUser?.userType=='owner'" class="file-upload-container">
+    <input #myInput1 type="file" placeholder="Select File" (change)="onFileSelected($event,1)" class="file-input" />
+    <app-button text="Upload" (click)="uploadFile(1,'aup')"></app-button>
+  </div>
   <h3>DMCA Notice & Takedown Policy</h3>
   <p>HTML: <a href="./assets/DCMA-Notice-and-Takedown-Policy.html" target="_blank">DMCA Notice & Takedown Policy</a></p>
+  <div *ngIf="currentUser?.userType=='admin'||currentUser?.userType=='owner'" class="file-upload-container">
+    <input #myInput2 type="file" placeholder="Select File" (change)="onFileSelected($event,2)" class="file-input" />
+    <app-button text="Upload" (click)="uploadFile(2,'dmca')"></app-button>
+  </div>
   <div *ngIf="currentUser?.userType==='admin' || currentUser?.userType==='owner'">
     <h3>DMCA Takedown Procedure and Tools</h3>
     <p>HTML: <a href="./assets/DCMA-Entry-Workflow-and-Tool-Usage.html" target="_blank">Workflow and usage of site DCMA
