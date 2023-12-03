@@ -1,5 +1,3 @@
-/* error-popup.component.css */
-
 .popup-container {
   position: fixed;
   top: 0;
@@ -17,7 +15,7 @@
   padding: 20px;
   border-radius: 8px;
   position: relative;
-  width: 400px; /* Adjust the width as needed */
+  width: 400px;
 }
 
 .close-button {
@@ -25,9 +23,8 @@
   top: 10px;
   right: 10px;
   cursor: pointer;
-  color: red; /* Set the color of the close icon */
+  color: red;
 }
-
 
 .hero-details {
   background-color: #f0f0f0;

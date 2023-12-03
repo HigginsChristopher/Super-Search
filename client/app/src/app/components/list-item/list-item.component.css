@@ -16,7 +16,6 @@
   justify-content: space-between;
 }
 
-/* Add styling for the form and search results */
 .form-group {
   margin-bottom: 15px;
 }
@@ -40,12 +39,9 @@ app-button {
   margin-top: 10px;
 }
 
-/* Add styling for search results */
 .search-results {
   margin-top: 20px;
 }
-
-
 
 .search-results ul {
   list-style-type: none;
@@ -97,11 +93,11 @@ app-button {
 .hero-details .powers-list {
   margin-top: 10px;
   display: flex;
-  flex-wrap: wrap; /* Allow powers to wrap to the next line */
+  flex-wrap: wrap;
 }
 
 .hero-details .powers-list li {
-  margin-right: 10px; /* Adjust the spacing between powers */
+  margin-right: 10px;
 }
 
 .powers-list {
@@ -114,5 +110,4 @@ app-button {
   margin-bottom: 5px;
   cursor: pointer;
   transition: none;
-  /* Remove the transition effect */
 }

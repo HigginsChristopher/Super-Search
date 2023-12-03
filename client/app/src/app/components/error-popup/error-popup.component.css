@@ -1,5 +1,3 @@
-/* error-popup.component.css */
-
 .popup-container {
   z-index: 1000;
   position: fixed;
@@ -19,7 +17,6 @@
   border-radius: 8px;
   position: relative;
   width: 400px;
-  /* Adjust the width as needed */
 }
 
 .close-button {
@@ -28,7 +25,6 @@
   right: 10px;
   cursor: pointer;
   color: red;
-  /* Set the color of the close icon */
 }
 
 
@@ -92,5 +88,5 @@
 
 .smallText {
   font-size: small;
-  max-width: 100%; /* You can adjust this value based on your layout requirements */
+  max-width: 100%; 
 }

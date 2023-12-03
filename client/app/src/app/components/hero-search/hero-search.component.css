@@ -1,4 +1,3 @@
-/* Add styling for the form and search results */
 .form-group {
   margin-bottom: 15px;
 }
@@ -22,7 +21,6 @@ app-button {
   margin-top: 10px;
 }
 
-/* Add styling for search results */
 .search-results {
   margin-top: 20px;
 }
@@ -105,13 +103,11 @@ app-button {
   background-color: #e0e0e0;
 }
 
-/* Styling for the details link */
 .details-link {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  /* Adjust as needed */
   margin-top: 15px;
   color: steelblue;
   text-decoration: none;

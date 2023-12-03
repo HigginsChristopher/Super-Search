@@ -21,7 +21,6 @@ footer {
     transform: translateX(-50%);
 }
 
-/* Align the new button to the bottom right */
 .admin-button {
     order: 3;
 }

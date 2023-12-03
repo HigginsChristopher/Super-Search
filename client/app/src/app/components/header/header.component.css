@@ -1,31 +1,24 @@
-/* Header Styles */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    /* Choose your preferred background color */
     color: black;
-    /* Choose your preferred text color */
 }
 
-/* About Us Styles */
 .about-section {
     background-color: #e0e0e0;
-    /* Light grey background */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* About Subheader Styles */
 .about-subheader {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
 }
 
-/* Optional: Add a subtle border-radius to the about section */
 .about-section {
     margin-bottom: 10px;
     border-radius: 8px;
@@ -35,14 +28,13 @@ header {
     position: relative;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 60px; /* Adjust the bottom margin as needed */
+    margin-bottom: 60px; 
 }
 
 .button-container > div {
     flex: 1;
 }
 
-/* Center the middle button */
 .button-container > div:nth-child(2) {
     position: absolute;
     left: 50%;
@@ -50,7 +42,6 @@ header {
     text-align: center;
 }
 
-/* Align the third button to the far right */
 .button-container > div:nth-child(3) {
     position: absolute;
     right: 0;
