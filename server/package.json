@@ -17,6 +17,7 @@
     "joi": "^13.1.0",
     "jsonwebtoken": "^9.0.2",
     "lowdb": "^1.0.0",
+    "multer": "^1.4.5-lts.1",
     "sanitize-html": "^2.11.0",
     "validator": "^13.11.0"
   },
