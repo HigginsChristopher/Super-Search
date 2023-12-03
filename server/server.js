@@ -1,7 +1,10 @@
-// Importing dependencies (express, script.js and jwt)
+// Importing dependencies (express, script.js, jwt, path, mutler and fs)
 const express = require("express");
 const superhero_util = require('./script.js');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require("fs");
 
 // Setting up port and express application
 const port = process.env.PORT || 3000;
@@ -9,6 +12,13 @@ const app = express();
 
 // Secret key for JWT
 const secretKey = "c25a959c1565f04b62c983c9e7413bff2bf873db9a1460a2e91c97f14c092cd982c26a8dcb8ff018b785e77214056efd55425ae4107e1fb6836e35649aeab2b8";
+
+// MIDDLEWARE
+// Middleware to make data in body and response is in JSON
+app.use(express.json());
+
+// Middleware to serve static files in assets folder
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Middleware to authenticate JWT token
 const authenticateToken = (req, res, next) => {
@@ -71,11 +81,80 @@ const checkOwner = (req, res, next) => {
     }
 };
 
-// MIDDLEWARE
-// Middleware to make data in body and response is in JSON
-app.use(express.json());
+// Multer disk storage configuration
+const storage = multer.diskStorage({
+    // Setting the destination directory for uploaded files
+    destination: (req, file, cb) => {
+        // Defining the upload path as the 'assets' directory in the current script directory
+        const uploadPath = path.join(__dirname, 'assets');
+        // Callback to notify multer where to store the file
+        cb(null, uploadPath);
+    },
+    // Setting the filename for the uploaded file
+    filename: (req, file, cb) => {
+        // Keeping the original filename for the uploaded file
+        cb(null, file.originalname);
+    },
+});
+
+// Multer configuration using the defined storage
+const upload = multer({ storage: storage });
 
 // ENDPOINTS
+// Endpoint to POST (update) policies to backend for storage ( accessible by authenticated admins )
+app.post('/api/secure/policies/', authenticateToken, checkAdmin, upload.single('file'), (req, res) => {
+    const policyType = req.body.policyType;
+    const uploadedFile = req.file;
+
+    // Ensure that a policy type is provided
+    if (!policyType) {
+        return res.status(400).send({ message: 'Policy type is required.' });
+    }
+
+    // Perform policy-specific logic based on the policy type
+    let fileName;
+    if (policyType === 's&p') {
+        fileName = 'Security-and-Privacy-Policy';
+    } else if (policyType === 'aup') {
+        fileName = 'Acceptable-Use-Policy';
+    } else if (policyType === 'dmca') {
+        fileName = 'DCMA-Notice-and-Takedown-Policy';
+    } else {
+        return res.status(400).send({ message: 'Invalid policy type. Upload canceled.' });
+    }
+
+    // Ensure that the file has the correct extension (.html)
+    const fileExtension = path.extname(uploadedFile.originalname);
+    if (fileExtension.toLowerCase() !== '.html') {
+        fs.unlink(uploadedFile.path, (err) => {
+            if (err) {
+                console.error('Error deleting the file:', err);
+            } else {
+                console.log('File deleted successfully.');
+            }
+        });
+
+        return res.status(400).send({ message: 'Invalid file type. Only HTML files are allowed.' });
+    }
+
+    fileName += fileExtension;
+
+    // Save the file with the new filename
+    const destinationPath = path.join(__dirname, 'assets');
+    const newFilePath = path.join(destinationPath, fileName);
+
+    fs.rename(uploadedFile.path, newFilePath, (err) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error saving the file.' });
+        }
+
+        res.send({ message: 'File uploaded successfully!', filename: fileName });
+    })
+
+});
+
+
+
 // Endpoint to POST (create) DCMA claims ( accessible by authenticated admins)
 app.post('/api/admin/dcma/', authenticateToken, checkAdmin, async (req, res) => {
     const { error } = superhero_util.validate_create_dmca(req.body.dcma);
