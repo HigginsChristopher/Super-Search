@@ -5,7 +5,7 @@ Welcome to Super Search, a dynamic web application for superhero enthusiasts! Su
 ## Features
 
 - **Superhero Database**: Explore a comprehensive database of superheroes from various universes.
-- **Personalized Lists**: Create and manage lists of favorite superheroes tailored to your preferences.
+- **Personalized Lists**: Create and manage lists of favourite superheroes tailored to your preferences.
 - **Advanced Search**: Utilize advanced search functionalities for efficient superhero discovery.
 - **Community Interaction**: Engage with fellow superhero enthusiasts through reviews and comments.
 - **Admin Controls**: Administrators can manage user accounts and platform policies.
@@ -29,8 +29,8 @@ To get started with Super Search, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/HigginsChristopher-username/super-search.git`
 2. Install dependencies: `npm install`
-3. Start the server: `npm start`
-4. Navigate to `http://localhost:3000` in your browser to access the application.
+3. Start the application: `npm start`
+4. Navigate to `http://localhost:4200` in your browser to access the application.
 
 ## Acknowledgements
 
