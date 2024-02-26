@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": 0,
+      "username": "adminstrator",
+      "password": "$2b$10$iyvWWcTnX2ClglFzta0KG.gkCQDBjKFg4ifpKPtu70EM6JLQ13E12",
+      "email": "admin@admin.com",
+      "verificationToken": "",
+      "verified": true,
+      "userType": "owner",
+      "disabled": false
+    }
+  ]
+}
