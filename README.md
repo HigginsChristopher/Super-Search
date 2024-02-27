@@ -28,9 +28,8 @@ Welcome to Super Search, a dynamic web application for superhero enthusiasts! Su
 To get started with Super Search, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/HigginsChristopher/Super-Search.git`
-2. Install dependencies: `npm install`
-3. Start the application: `npm start`
-4. Navigate to `http://localhost:4200` in your browser to access the application.
+2. Start the application (will also install dependencies): `npm start`
+3. Navigate to `http://localhost:4200` in your browser to access the application.
 
 ## Acknowledgements
 
