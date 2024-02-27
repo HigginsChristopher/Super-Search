@@ -35,3 +35,6 @@ To get started with Super Search, follow these steps:
 
 - Fuse.js for advanced search functionality
 - Other libraries/frameworks used
+
+
+Please note that the application is not currently hosted on AWS due to credit limitations.
